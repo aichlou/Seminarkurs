@@ -20,11 +20,6 @@ except (ImportError, RuntimeError):
         def output(pin, state):
             print(f"[MOCK GPIO] output(pin={pin}, state={state})")
 
-
-'''
- '''
-
-
 def setup_motors():
     GPIO.setmode(GPIO.BOARD)
     for motor in range(2):
@@ -42,14 +37,21 @@ def setup_motors():
         GPIO.output(ENA, GPIO.LOW)
         GPIO.output(DIR, GPIO.HIGH)
 
-for _ in range(200000):
-    GPIO.output(PUL, GPIO.HIGH)
-    time.sleep(0.0001)
-    GPIO.output(PUL, GPIO.LOW)
-    time.sleep(0.0001)
-
-GPIO.output(ENA, GPIO.HIGH)
-
-
-def rotate():
-    round
+def rotate(motor, speed):
+    if motor == 0:
+        PUL = 8
+        DIR = 10
+        ENA = 12
+    elif motor == 1:
+        PUL = 11
+        DIR = 13
+        ENA = 15
+    pause = ((10-speed)**0.5)/10 + 0.0001
+    GPIO.output(ENA, GPIO.LOW)
+    for _ in range(200000):
+        GPIO.output(PUL, GPIO.HIGH)
+        time.sleep(pause)
+        GPIO.output(PUL, GPIO.LOW)
+        time.sleep(pause)
+        #Noch irgendwie besser machen damit abbrechen besser geht
+    GPIO.output(ENA, GPIO.HIGH)
