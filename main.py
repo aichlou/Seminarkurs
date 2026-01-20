@@ -16,17 +16,21 @@ host = threading.Thread(target=webserver.host_server, args=(commands, ))
 host.start()
 print("Hosting Webserver")
 commands.put(("change_state", 0, True))
+motor.setup_motors()
+print("Motors are set up")
 while True:
     cmd = commands.get()
     command, *args = cmd
     match command:
         case "start_motor":
+            print("Starting motor thread")
             rotate = threading.Thread(target=motor.rotate, args=args)
             rotate.start()
         case "change_state":
             change = threading.Thread(target=temp, args=args)
             change.start()
         case "stop_motor":
+            print("Stopping motor")
             motor.stop_motor()
         case _:
             raise Exception("This is an Error")

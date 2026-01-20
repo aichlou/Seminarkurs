@@ -26,11 +26,11 @@ stop_event = threading.Event()
 def setup_motors():
     GPIO.setmode(GPIO.BOARD)
     for motor in range(2):
-        if motor == 0:
+        if motor == "X":
             PUL = 8
             DIR = 10
             ENA = 12
-        elif motor == 1:
+        elif motor == "Y":
             PUL = 11
             DIR = 13
             ENA = 15
@@ -41,19 +41,23 @@ def setup_motors():
         GPIO.output(DIR, GPIO.HIGH)
 
 def rotate(motor, speed):
-    if motor == 0:
+    print("DEBUG:", type(motor), repr(motor))
+    if motor == "X":
+        print("Hallo")
         PUL = 8
         DIR = 10
         ENA = 12
-    elif motor == 1:
+    elif motor == "Y":
         PUL = 11
         DIR = 13
         ENA = 15
     else:
+        print("Ungültiger Motorindex:", repr(motor))
         raise ValueError("Ungültiger Motorindex")
     if(speed < 0):
         GPIO.output(DIR, GPIO.HIGH)
         speed = -speed
+    print(f"Starte Motor {motor} mit Geschwindigkeit {speed}")
     while not stop_event.is_set():
         pause = ((10-speed)**0.5)/10 + 0.0001
         GPIO.output(ENA, GPIO.LOW)
