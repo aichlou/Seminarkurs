@@ -1,6 +1,7 @@
 import time
+import threading
 try:
-    import RPi.GPIO as GPIO
+    import RPi.GPIO as GPIO  # type: ignore
 except (ImportError, RuntimeError):
     class GPIO:
         BOARD = "BOARD"
@@ -20,6 +21,8 @@ except (ImportError, RuntimeError):
         def output(pin, state):
             print(f"[MOCK GPIO] output(pin={pin}, state={state})")
 
+stop_event = threading.Event()
+
 def setup_motors():
     GPIO.setmode(GPIO.BOARD)
     for motor in range(2):
@@ -38,20 +41,30 @@ def setup_motors():
         GPIO.output(DIR, GPIO.HIGH)
 
 def rotate(motor, speed):
-    if motor == 0:
-        PUL = 8
-        DIR = 10
-        ENA = 12
-    elif motor == 1:
-        PUL = 11
-        DIR = 13
-        ENA = 15
-    pause = ((10-speed)**0.5)/10 + 0.0001
-    GPIO.output(ENA, GPIO.LOW)
-    for _ in range(200000):
-        GPIO.output(PUL, GPIO.HIGH)
-        time.sleep(pause)
-        GPIO.output(PUL, GPIO.LOW)
-        time.sleep(pause)
-        #Noch irgendwie besser machen damit abbrechen besser geht
+    if(speed < 0):
+        GPIO.output(DIR, GPIO.HIGH)
+        speed = -speed
+    while not stop_event.is_set():
+        if motor == 0:
+            PUL = 8
+            DIR = 10
+            ENA = 12
+        elif motor == 1:
+            PUL = 11
+            DIR = 13
+            ENA = 15
+        pause = ((10-speed)**0.5)/10 + 0.0001
+        GPIO.output(ENA, GPIO.LOW)
+        for _ in range(200000):
+            GPIO.output(PUL, GPIO.HIGH)
+            time.sleep(pause)
+            GPIO.output(PUL, GPIO.LOW)
+            time.sleep(pause)
+        GPIO.output(ENA, GPIO.HIGH)
+    print("Motor gestoppt")
     GPIO.output(ENA, GPIO.HIGH)
+    GPIO.output(DIR, GPIO.LOW)
+
+
+def stop_motor():
+    stop_event.set()
