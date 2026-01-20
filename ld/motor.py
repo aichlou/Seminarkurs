@@ -1,10 +1,30 @@
 import time
 import threading
-import lgpio
+try:
+    import RPi.GPIO as GPIO  # type: ignore
+except (ImportError, RuntimeError):
+    class GPIO:
+        BOARD = "BOARD"
+        OUT = "OUT"
+        LOW = 0
+        HIGH = 1
+
+        @staticmethod
+        def setmode(mode):
+            print(f"[MOCK GPIO] setmode({mode})")
+
+        @staticmethod
+        def setup(pin, mode):
+            print(f"[MOCK GPIO] setup(pin={pin}, mode={mode})")
+
+        @staticmethod
+        def output(pin, state):
+            print(f"[MOCK GPIO] output(pin={pin}, state={state})")
+
 stop_event = threading.Event()
 
 def setup_motors():
-    h = lgpio.gpiochip_open(0)
+    GPIO.setmode(GPIO.BOARD)
     for motor in range(2):
         if motor == 0:
             PUL = 8
