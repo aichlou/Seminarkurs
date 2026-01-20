@@ -19,6 +19,7 @@ commands.put(("change_state", 0, True))
 motor.setup_motors()
 print("Motors are set up")
 while True:
+    print("Warte auf Befehle...")
     cmd = commands.get()
     command, *args = cmd
     match command:
