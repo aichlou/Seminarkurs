@@ -41,18 +41,20 @@ def setup_motors():
         GPIO.output(DIR, GPIO.HIGH)
 
 def rotate(motor, speed):
+    if motor == 0:
+        PUL = 8
+        DIR = 10
+        ENA = 12
+    elif motor == 1:
+        PUL = 11
+        DIR = 13
+        ENA = 15
+    else:
+        raise ValueError("Ungültiger Motorindex")
     if(speed < 0):
         GPIO.output(DIR, GPIO.HIGH)
         speed = -speed
     while not stop_event.is_set():
-        if motor == 0:
-            PUL = 8
-            DIR = 10
-            ENA = 12
-        elif motor == 1:
-            PUL = 11
-            DIR = 13
-            ENA = 15
         pause = ((10-speed)**0.5)/10 + 0.0001
         GPIO.output(ENA, GPIO.LOW)
         for _ in range(200000):
