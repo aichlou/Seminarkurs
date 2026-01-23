@@ -1,5 +1,6 @@
 import time
 import threading
+from ld import motor
 import lgpio
 stop_event = threading.Event()
 h = None
@@ -26,15 +27,14 @@ def setup_motors():
         lgpio.gpio_write(h, DIR, 1)
 def rotate(motor, speed):
     print("DEBUG:", type(motor), repr(motor))
-    if motor == "X":
-        print("Hallo")
-        PUL = 8
-        DIR = 10
-        ENA = 12
-    elif motor == "Y":
-        PUL = 11
-        DIR = 13
-        ENA = 15
+    if motor == 0:
+        PUL = 14  # Pin 8  → GPIO14
+        DIR = 15  # Pin 10 → GPIO15
+        ENA = 18  # Pin 12 → GPIO18
+    elif motor == 1:
+        PUL = 17  # Pin 11 → GPIO17
+        DIR = 27  # Pin 13 → GPIO27
+        ENA = 22  # Pin 15 → GPIO22
     else:
         print("Ungültiger Motorindex:", repr(motor))
         raise ValueError("Ungültiger Motorindex")
@@ -50,10 +50,16 @@ def rotate(motor, speed):
         for step in range(200000):
             if stop_event.is_set():
                 break
+            '''
             lgpio.gpio_write(h, PUL, 1)
             time.sleep(pause)
             lgpio.gpio_write(h, PUL, 0)
             time.sleep(pause)
+            '''
+            lgpio.gpio_write(h, PUL, 1)
+            time.sleep(0.0002)
+            lgpio.gpio_write(h, PUL, 0)
+            time.sleep(0.0002)
         
         lgpio.gpio_write(h, ENA, 1)
     print("Motor gestoppt")
