@@ -22,7 +22,7 @@ def setup_motors():
         lgpio.gpio_claim_output(h, PUL, 0)
         lgpio.gpio_claim_output(h, DIR, 0)
         lgpio.gpio_claim_output(h, ENA, 0)
-        lgpio.gpio_write(h, ENA, 1)
+        lgpio.gpio_write(h, ENA, 0)
         lgpio.gpio_write(h, DIR, 1)
 def rotate(motor, speed):
     print("DEBUG:", type(motor), repr(motor))
@@ -43,7 +43,7 @@ def rotate(motor, speed):
         speed = -speed
     print(f"Starte Motor {motor} mit Geschwindigkeit {speed}")
     while not stop_event.is_set():
-        pause = 0.0001 * ((11 - speed) ** 2) / 100
+        pause = 0.0001 * ((11 - speed) ** 2) / 1000
         print(f"Pause gesetzt auf {pause} Sekunden")
         lgpio.gpio_write(h, ENA, 0)
         
@@ -63,3 +63,5 @@ def rotate(motor, speed):
 
 def stop_motor():
     stop_event.set()
+    #ENA muss noch auf 1 gesetzt werden
+    print("Stop Event gesetzt")

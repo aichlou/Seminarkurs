@@ -1,8 +1,8 @@
 import time
 import lgpio
 
-ENA = 15  # Enable
-PUL = 11  # Puls/Step Pin (musst du anpassen!)
+ENA = 22  # Enable
+PUL = 17  # Puls/Step Pin (musst du anpassen!)
 
 h = lgpio.gpiochip_open(0)
 lgpio.gpio_claim_output(h, ENA)
