@@ -1,11 +1,25 @@
-import RPi.GPIO as GPIO
 import time
+import lgpio
 
-ENA = 15
+ENA = 15  # Enable
+PUL = 11  # Puls/Step Pin (musst du anpassen!)
 
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(ENA, GPIO.OUT)
+h = lgpio.gpiochip_open(0)
+lgpio.gpio_claim_output(h, ENA)
+lgpio.gpio_claim_output(h, PUL)
 
-GPIO.output(ENA, GPIO.LOW)
-time.sleep(2)
-GPIO.output(ENA, GPIO.HIGH)
+print("Motor läuft...")
+
+# Motor aktivieren
+lgpio.gpio_write(h, ENA, 0)
+
+# Schritte fahren
+for _ in range(20000):
+    lgpio.gpio_write(h, PUL, 1)
+    time.sleep(0.0002)
+    lgpio.gpio_write(h, PUL, 0)
+    time.sleep(0.0002)
+
+# Motor deaktivieren
+lgpio.gpio_write(h, ENA, 1)
+print("Fertig")
