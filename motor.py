@@ -27,11 +27,11 @@ def setup_motors():
         lgpio.gpio_write(h, DIR, 1)
 def rotate(motor, speed):
     print("DEBUG:", type(motor), repr(motor))
-    if motor == 0:
+    if motor == "X":
         PUL = 14  # Pin 8  → GPIO14
         DIR = 15  # Pin 10 → GPIO15
         ENA = 18  # Pin 12 → GPIO18
-    elif motor == 1:
+    elif motor == "Y":
         PUL = 17  # Pin 11 → GPIO17
         DIR = 27  # Pin 13 → GPIO27
         ENA = 22  # Pin 15 → GPIO22
@@ -44,22 +44,17 @@ def rotate(motor, speed):
     print(f"Starte Motor {motor} mit Geschwindigkeit {speed}")
     while not stop_event.is_set():
         pause = 0.0001 * ((11 - speed) ** 2) / 1000
-        print(f"Pause gesetzt auf {pause} Sekunden")
+        print(f"DEBUG: Geschwindigkeit {speed} ergibt Pause {pause}")
+        print("Richtwert für Pause ist 0.0002")
         lgpio.gpio_write(h, ENA, 0)
         
         for step in range(200000):
             if stop_event.is_set():
                 break
-            '''
             lgpio.gpio_write(h, PUL, 1)
             time.sleep(pause)
             lgpio.gpio_write(h, PUL, 0)
             time.sleep(pause)
-            '''
-            lgpio.gpio_write(h, PUL, 1)
-            time.sleep(0.0002)
-            lgpio.gpio_write(h, PUL, 0)
-            time.sleep(0.0002)
         
         lgpio.gpio_write(h, ENA, 1)
     print("Motor gestoppt")
