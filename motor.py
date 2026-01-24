@@ -2,7 +2,8 @@ import time
 import threading
 from ld import motor
 import lgpio
-stop_event = threading.Event()
+stop_event_x = threading.Event()
+stop_event_y = threading.Event()
 h = None
 
 def setup_motors():
@@ -65,7 +66,10 @@ def rotate(motor, speed):
     lgpio.gpio_write(h, DIR, 0)
 
 
-def stop_motor():
-    stop_event.set()
+def stop_motor(motor):
+    if motor == "X":
+        stop_event_x.set()
+    elif motor == "Y":
+        stop_event_y.set()
     #ENA muss noch auf 1 gesetzt werden
     print("Stop Event gesetzt")

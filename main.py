@@ -15,8 +15,6 @@ commands = Queue()
 host = threading.Thread(target=webserver.host_server, args=(commands, ))
 host.start()
 print("Hosting Webserver")
-time.sleep(10)
-commands.put(("change_state", 0, True))
 motor.setup_motors()
 print("Motors are set up")
 while True:
