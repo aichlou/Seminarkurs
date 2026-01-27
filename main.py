@@ -2,6 +2,7 @@ import time
 import threading
 import webserver
 import motor
+import sensor
 from queue import Queue
 
 def temp(index, value):
@@ -17,6 +18,8 @@ host.start()
 print("Hosting Webserver")
 motor.setup_motors()
 print("Motors are set up")
+sensor = threading.Thread(target=sensor.read_sensors, args=(commands,))
+sensor.start()
 while True:
     print("Warte auf Befehle...")
     cmd = commands.get()
@@ -27,7 +30,7 @@ while True:
             rotate = threading.Thread(target=motor.rotate, args=args)
             rotate.start()
         case "change_state":
-            change = threading.Thread(target=temp, args=args)
+            change = threading.Thread(target=webserver.set_state, args=args)
             change.start()
         case "stop_motor":
             print("Stopping motor")
