@@ -31,6 +31,6 @@ while True:
             change.start()
         case "stop_motor":
             print("Stopping motor")
-            motor.stop_motor(args)
+            motor.stop_motor(args[0])
         case _:
             raise Exception("This is an Error")

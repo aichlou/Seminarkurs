@@ -65,6 +65,8 @@ def rotate(motor, speed):
             time.sleep(pause)
         
         lgpio.gpio_write(h, ENA, 1)
+        if(motor == "X" and stop_event_x.is_set()) or (motor == "Y" and stop_event_y.is_set()):
+            break
     print("Motor gestoppt")
     lgpio.gpio_write(h, ENA, 0)
     lgpio.gpio_write(h, DIR, 0)
