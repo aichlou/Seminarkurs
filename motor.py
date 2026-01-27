@@ -27,7 +27,10 @@ def setup_motors():
         lgpio.gpio_write(h, ENA, 0)
         lgpio.gpio_write(h, DIR, 1)
 def rotate(motor, speed):
-    stop_event.clear()
+    if motor == "X":
+        stop_event_x.clear()
+    elif motor == "Y":
+        stop_event_y.clear()
     print("DEBUG:", type(motor), repr(motor))
     if motor == "X":
         PUL = 14  # Pin 8  → GPIO14
@@ -46,6 +49,7 @@ def rotate(motor, speed):
     else:
         lgpio.gpio_write(h, DIR, 0)
     print(f"Starte Motor {motor} mit Geschwindigkeit {speed}")
+    stop_event = stop_event_x if motor == "X" else stop_event_y
     while not stop_event.is_set():
         pause = 1 / (100* (speed + 7))
         print(f"DEBUG: Geschwindigkeit {speed} ergibt Pause {pause}")
