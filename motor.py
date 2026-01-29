@@ -58,6 +58,7 @@ def rotate(motor, speed):
         
         for step in range(200000):
             if stop_event.is_set():
+                print("Stop Event erkannt, Motor wird gestoppt")
                 break
             lgpio.gpio_write(h, PUL, 1)
             time.sleep(pause)

@@ -18,7 +18,7 @@ host.start()
 print("Hosting Webserver")
 motor.setup_motors()
 print("Motors are set up")
-sensor = threading.Thread(target=sensor.read_sensors, args=(commands,))
+sensor = threading.Thread(target=sensor.read_sensors, args=(commands, ))
 sensor.start()
 while True:
     print("Warte auf Befehle...")
