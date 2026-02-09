@@ -2,6 +2,7 @@ import time
 import threading
 from ld import motor
 import lgpio
+from test import ENA
 stop_event_x = threading.Event()
 stop_event_y = threading.Event()
 h = None
@@ -81,3 +82,14 @@ def stop_motor(motor):
         raise ValueError("Ungültiger Motorindex zum Stoppen")
     #ENA muss noch auf 1 gesetzt werden
     print("Stop Event gesetzt")
+
+
+
+def cleanup():
+    global h
+    lgpio.gpiochip_write(18, 0)
+    lgpio.gpiochip_write(22, 0)
+    lgpio.gpiochip_close(h)
+    print("GPIOs freigegeben")
+
+    
