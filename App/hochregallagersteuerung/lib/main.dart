@@ -46,6 +46,36 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void settings() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Einstellungen'),
+          content: Row(
+            children: [
+              Text('IP-Adresse:'),
+              Expanded(
+                child: TextField(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'IP-Adresse',
+                ),
+              ),
+              )
+            ]
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Tschau Kakao')
+            )
+          ]
+        );
+      }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,21 +104,53 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: .start,
           children: [
             SizedBox(height: 30,),
-            DefaultBody()
+            NoArticles(),
+            LoadArticles()
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: newItem,
-        tooltip: 'Add new Item',
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            onPressed: settings,
+            tooltip: 'Settings',
+            child: const Icon(Icons.settings)),
+          SizedBox(height: 10,),
+          FloatingActionButton(
+            onPressed: newItem,
+            tooltip: 'Add new Item',
+            child: const Icon(Icons.add),
+          ),
+          
+        ]
+      )
     );
   }
 }
 
-class DefaultBody extends StatelessWidget {
-  const DefaultBody({super.key});
+class LoadArticles extends StatelessWidget {
+  const LoadArticles({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text("Verbinde zum Raspberry Pi..."),
+        Lottie.asset(
+          'assets/animations/Loading Dots Blue.json',
+          width: 400,
+          height: 200,
+          repeat: true
+        )
+      ],
+    );
+  }
+}
+
+
+class NoArticles extends StatelessWidget {
+  const NoArticles({super.key});
 
   @override
   Widget build(BuildContext context) {
