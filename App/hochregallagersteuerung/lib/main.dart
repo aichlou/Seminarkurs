@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -11,6 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Hochregallagersteuerung',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: .fromSeed(seedColor: Colors.blue),
       ),
@@ -54,7 +56,7 @@ class _HomePageState extends State<HomePage> {
           title: Text('Einstellungen'),
           content: Row(
             children: [
-              Text('IP-Adresse:'),
+              Text('IP-Adresse: '),
               Expanded(
                 child: TextField(
                 decoration: InputDecoration(
@@ -74,6 +76,31 @@ class _HomePageState extends State<HomePage> {
         );
       }
     );
+  }
+
+  Future<List<List<String>>> fetchContent() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://127.0.0.1:5000/fetch')
+      );
+      debugPrint('Antwort: ${response.body}');
+    }
+    catch (error) {
+      debugPrint(error.toString()); //Server nicht gefunden vmtl
+      if (error.toString().startsWith('ClientException with SocketException: Connection refused')) {
+        debugPrint('Server nicht gefunden');
+      }
+      else {
+        debugPrint('Ein Unbekannter Fehler ist aufgetreten. Probleme mit der Connection zum Server');
+      }
+    }
+    return [['String']];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchContent();
   }
 
   @override
@@ -112,6 +139,12 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          FloatingActionButton(
+            onPressed: fetchContent,
+            tooltip: 'Connect to Server',
+            child: const Icon(Icons.replay_outlined)
+          ),
+          SizedBox(height: 10,),
           FloatingActionButton(
             onPressed: settings,
             tooltip: 'Settings',
