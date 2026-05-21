@@ -29,6 +29,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String ipAddr = '127.0.0.1';
+  final TextEditingController _controller = TextEditingController();
 
   void newItem() {
     showDialog(
@@ -59,9 +61,11 @@ class _HomePageState extends State<HomePage> {
               Text('IP-Adresse: '),
               Expanded(
                 child: TextField(
+                  controller: _controller,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'IP-Adresse',
+                  hintText: ipAddr,
                 ),
               ),
               )
@@ -69,7 +73,11 @@ class _HomePageState extends State<HomePage> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                ipAddr = _controller.text;
+                _controller.text = '';
+                Navigator.pop(context);
+              },
               child: Text('Tschau Kakao')
             )
           ]
@@ -81,7 +89,7 @@ class _HomePageState extends State<HomePage> {
   Future<List<List<String>>> fetchContent() async {
     try {
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:5000/fetch')
+        Uri.parse('http://$ipAddr:5000/fetch')
       );
       debugPrint('Antwort: ${response.body}');
     }
@@ -94,7 +102,7 @@ class _HomePageState extends State<HomePage> {
         debugPrint('Ein Unbekannter Fehler ist aufgetreten. Probleme mit der Connection zum Server');
       }
     }
-    return [['String']];
+    return [['Error']];
   }
 
   @override

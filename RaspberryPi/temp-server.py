@@ -8,11 +8,11 @@ def recieve_message():
 
 @app.route('/fetch')
 def fetch():
-    
+    return "Kein Inhalt"
 
 @app.errorhandler(404)
 def not_found(error):    
-    return "Error, Route nicht gefunden"
+    return "Error: Route nicht gefunden"
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000)
