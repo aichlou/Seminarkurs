@@ -1,0 +1,3 @@
+- Nicht bei jedem Error 404, bei unbekannten Errors anderst umgehen
+- Auto Load
+- Wenn IP-Addressenfeld leer ist nicht leeres Feld speichern

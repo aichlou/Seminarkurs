@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -32,6 +33,7 @@ class _HomePageState extends State<HomePage> {
   String ipAddr = '127.0.0.1';
   final TextEditingController _controller = TextEditingController();
   List<String> content = ['Search'];
+  Map<String, dynamic> data = {'default': 'default'};
 
   Widget contentVerarbeiten() {
     debugPrint('Content Verarbeiten Funktion: $content');
@@ -44,23 +46,23 @@ class _HomePageState extends State<HomePage> {
     else if(content[0] == 'Error') {
       return NotFound();
     }
-    return showArticles(content);
+    return showArticles();
   }
 
-  Widget showArticles(List<String> articles) {
+  Widget showArticles() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        for (String article in articles) ...[
+        for (var entry in data.entries) ...[
           SizedBox(height: 10,),
-          showArticle(article),
+          showArticle(entry.value),
         ]
       ],
     );
   }
 
-  Widget showArticle(String article) {
-    return Text(article);
+  Widget showArticle(dynamic article) {
+    return Text(article['name']);
   }
 
   void newItem() {
@@ -126,6 +128,7 @@ class _HomePageState extends State<HomePage> {
       );
       debugPrint('Antwort: ${response.body}');
       content = [response.body];
+      data = jsonDecode(response.body);
       if (content[0] == 'Kein Inhalt') {
         content = [];
       }
@@ -135,6 +138,9 @@ class _HomePageState extends State<HomePage> {
       debugPrint(error.toString()); //Server nicht gefunden vmtl
       if (error.toString().startsWith('ClientException with SocketException: Connection refused')) {
         debugPrint('Server nicht gefunden');
+      }
+      else if (error.toString().startsWith('FormatException: Unexpected character')) {
+        debugPrint('JSON kann nicht korret entcodet werden');
       }
       else {
         debugPrint('Ein Unbekannter Fehler ist aufgetreten. Probleme mit der Connection zum Server');

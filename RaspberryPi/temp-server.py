@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
@@ -8,7 +8,11 @@ def recieve_message():
 
 @app.route('/fetch')
 def fetch():
-    return "Kein Inhalt"
+    return jsonify({
+        "1": {"name": "Max", "age": 30},
+        "2": {"name": "Anna", "age": 25},
+        "3": {"name": "Bob", "age": 35},
+    })
 
 @app.errorhandler(404)
 def not_found(error):    
