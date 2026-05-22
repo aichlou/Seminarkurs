@@ -31,6 +31,37 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String ipAddr = '127.0.0.1';
   final TextEditingController _controller = TextEditingController();
+  List<String> content = ['Search'];
+
+  Widget contentVerarbeiten() {
+    debugPrint('Content Verarbeiten Funktion: $content');
+    if(content.isEmpty) {
+      return NoArticles();
+    }
+    else if(content[0] == 'Search') {
+      return LoadArticles();
+    }
+    else if(content[0] == 'Error') {
+      return NotFound();
+    }
+    return showArticles(content);
+  }
+
+  Widget showArticles(List<String> articles) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        for (String article in articles) ...[
+          SizedBox(height: 10,),
+          showArticle(article),
+        ]
+      ],
+    );
+  }
+
+  Widget showArticle(String article) {
+    return Text(article);
+  }
 
   void newItem() {
     showDialog(
@@ -88,10 +119,17 @@ class _HomePageState extends State<HomePage> {
 
   Future<List<List<String>>> fetchContent() async {
     try {
+      content = ['Search'];
+      setState(() {});
       final response = await http.get(
         Uri.parse('http://$ipAddr:5000/fetch')
       );
       debugPrint('Antwort: ${response.body}');
+      content = [response.body];
+      if (content[0] == 'Kein Inhalt') {
+        content = [];
+      }
+      setState(() {});
     }
     catch (error) {
       debugPrint(error.toString()); //Server nicht gefunden vmtl
@@ -101,8 +139,11 @@ class _HomePageState extends State<HomePage> {
       else {
         debugPrint('Ein Unbekannter Fehler ist aufgetreten. Probleme mit der Connection zum Server');
       }
+      content = ['Error'];
+      setState(() {});
+      return [['Error']];
     }
-    return [['Error']];
+    return [['']];
   }
 
   @override
@@ -139,8 +180,7 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: .start,
           children: [
             SizedBox(height: 30,),
-            NoArticles(),
-            LoadArticles()
+            contentVerarbeiten(),
           ],
         ),
       ),
@@ -206,5 +246,33 @@ class NoArticles extends StatelessWidget {
         )
       ]
     );
+  }
+}
+
+class NotFound extends StatelessWidget {
+  const NotFound({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text('Ip-Adresse nicht gefunden'),
+        Lottie.asset(
+          'assets/animations/Not Found.json',
+          width: 250,
+          height: 250,
+          repeat: true,
+        )
+      ],
+    );
+  }
+}
+
+class Nothing extends StatelessWidget {
+  const Nothing({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column();
   }
 }
