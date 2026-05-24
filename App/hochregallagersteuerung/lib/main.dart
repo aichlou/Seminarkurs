@@ -54,8 +54,8 @@ class _HomePageState extends State<HomePage> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         for (var entry in data.entries) ...[
-          SizedBox(height: 10,),
           showArticle(entry.value),
+          SizedBox(height: 10,),
         ]
       ],
     );
@@ -65,6 +65,7 @@ class _HomePageState extends State<HomePage> {
     return Container(
       height: 100,
       width: MediaQuery.of(context).size.width - 20,
+      padding: EdgeInsets.all(5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(20)),
         color: Colors.blue,
@@ -73,7 +74,18 @@ class _HomePageState extends State<HomePage> {
           width: 3
         )
       ),
-      child: Text(article['name']),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            article['name'],
+            style: TextStyle(
+              fontSize: 20,
+            ),  
+          ),
+          Text(article['age'].toString())
+        ],
+      ),
     );
   }
 
@@ -198,7 +210,7 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             mainAxisAlignment: .start,
             children: [
-              SizedBox(height: 30,),
+              SizedBox(height: 10,),
               contentVerarbeiten(),
             ],
           ),
