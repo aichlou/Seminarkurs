@@ -12,6 +12,12 @@ def fetch():
         "1": {"name": "Max", "age": 30},
         "2": {"name": "Anna", "age": 25},
         "3": {"name": "Bob", "age": 35},
+        "4": {"name": "Max", "age": 30},
+        "5": {"name": "Anna", "age": 25},
+        "6": {"name": "Bob", "age": 35},
+        "7": {"name": "Max", "age": 30},
+        "8": {"name": "Anna", "age": 25},
+        "9": {"name": "Bob", "age": 35},
     })
 
 @app.errorhandler(404)

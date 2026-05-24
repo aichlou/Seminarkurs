@@ -62,7 +62,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget showArticle(dynamic article) {
-    return Text(article['name']);
+    return Container(
+      height: 100,
+      width: MediaQuery.of(context).size.width - 20,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+        color: Colors.blue,
+      ),
+      child: Text(article['name']),
+    );
   }
 
   void newItem() {
@@ -181,13 +189,15 @@ class _HomePageState extends State<HomePage> {
             SizedBox(width: 10)
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: .start,
-          children: [
-            SizedBox(height: 30,),
-            contentVerarbeiten(),
-          ],
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: .start,
+            children: [
+              SizedBox(height: 30,),
+              contentVerarbeiten(),
+            ],
+          ),
         ),
       ),
       floatingActionButton: Column(
