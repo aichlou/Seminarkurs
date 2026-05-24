@@ -68,6 +68,10 @@ class _HomePageState extends State<HomePage> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(20)),
         color: Colors.blue,
+        border: Border.all(
+          color: Colors.lightBlue,
+          width: 3
+        )
       ),
       child: Text(article['name']),
     );
