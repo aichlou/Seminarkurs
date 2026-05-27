@@ -1,6 +1,6 @@
 import time
 import threading
-from ld import motor
+# from ld import motor
 import lgpio
 from test import ENA
 stop_event_x = threading.Event()
@@ -9,6 +9,11 @@ h = None
 
 def setup_motors():
     global h
+    if h is not None:
+        try:
+            lgpio.gpiochip_close(h)
+        except:
+            pass
     h = lgpio.gpiochip_open(0)
     for motor in range(2):
         if motor == 0:
