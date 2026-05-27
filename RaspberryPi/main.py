@@ -35,5 +35,7 @@ while True:
         case "stop_motor":
             print("Stopping motor")
             motor.stop_motor(args[0])
+        case "initialize":
+            print("Initializing system")
         case _:
             raise Exception("This is an Error")
