@@ -2,7 +2,6 @@ import time
 import threading
 # from ld import motor
 import lgpio
-from test import ENA
 stop_event_x = threading.Event()
 stop_event_y = threading.Event()
 h = None

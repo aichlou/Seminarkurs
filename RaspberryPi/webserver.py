@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, render_template
 
 # Globale Zustände (z.B. Sensoren oder Motoren)
 states = [False, False, False, False]
@@ -18,7 +18,7 @@ def host_server(commands):
 
     @app.route("/")
     def index():
-        return send_file("index.html")
+        return render_template('index.html')
 
     @app.route("/action", methods=["POST"])
     def action():
