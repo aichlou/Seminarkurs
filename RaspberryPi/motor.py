@@ -97,3 +97,8 @@ def cleanup():
     print("GPIOs freigegeben")
 
     
+
+
+#setup_motors()
+#rotate("X", 0.7)
+#rotate("Y", 0.7)
