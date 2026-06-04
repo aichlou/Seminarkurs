@@ -40,7 +40,7 @@ while True:
             motor.stop_motor(args[0])
         case "init":
             print("Initializing system")
-            init_thread  = threading.Thread(target=init.init, args=(sensordata, ))
+            init_thread = threading.Thread(target=init.init, args=(sensordata, commands, ))
             init_thread.start()
         case _:
             raise Exception("This is an Error")
