@@ -2,7 +2,8 @@ import motor
 import time
 import sensor
 
-def init():
+def init(sensordata):
+    print("Debug")
     motor.setup_motors()
     motor.rotate("X", 0.7)
     start = time.time()

@@ -34,13 +34,13 @@ while True:
         case "change_state":
             change = threading.Thread(target=webserver.set_state, args=args)
             change.start()
-            Sensordata.put(command)
+            sensordata.put(command)
         case "stop_motor":
             print("Stopping motor")
             motor.stop_motor(args[0])
-        case "initialize":
+        case "init":
             print("Initializing system")
-            ini = threading.Thread(target=init.init, args=(sensordata, ))
-            
+            init_thread  = threading.Thread(target=init.init, args=(sensordata, ))
+            init_thread.start()
         case _:
             raise Exception("This is an Error")
