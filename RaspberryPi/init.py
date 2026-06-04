@@ -7,9 +7,12 @@ def init(sensordata, commands):
     commands.put(("start_motor", "X", 0.7))
     start = time.time()
     print("Starte x-Achsen Motor")
+    while not sensordata.empty():
+        sensordata.get()
     while True:
         cmd = sensordata.get()
         pin, state = cmd
         print(f"Pin {pin} ist jetzt {state}")
-        if pin in (20, 21) and state == 1:
+        if pin in (0, 1) and state:
             commands.put(("stop_motor", "X"))
+            print("Stoppe Motor")

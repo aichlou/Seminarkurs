@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, send_file, render_template
 
 # Globale Zustände (z.B. Sensoren oder Motoren)
 states = [False, False, False, False]
-wasInit = false
+wasInit = False
 
 def set_state(index, value):
     """Ändert einen State an der gegebenen Position"""
@@ -40,9 +40,10 @@ def host_server(commands):
     
     @app.route("/init")
     def initialize():
-        if wasInit == false:
+        global wasInit
+        if wasInit == False:
             commands.put(("init", ))
-            wasInit = true
+            wasInit = True
             return jsonify({"ok": True})
         else:
             return jsonify({"404": False})

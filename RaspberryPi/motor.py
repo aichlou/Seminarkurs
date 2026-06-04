@@ -94,7 +94,6 @@ def cleanup():
     lgpio.gpiochip_close(h)
     print("GPIOs freigegeben")
 
-    
 
 
 #setup_motors()
