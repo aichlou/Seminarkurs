@@ -5,11 +5,10 @@ import threading
 def read_sensors(commands):
     print("Starte Sensor-Lesefunktion")
     h = lgpio.gpiochip_open(0)
-    SENSOR_PINS = [21]
+    SENSOR_PINS = [21, 26]
     for pin in SENSOR_PINS:
         lgpio.gpio_claim_input(h, pin)
     states = [False] * len(SENSOR_PINS)
-
     last_states = [False] * len(SENSOR_PINS)
     while True:
         for pin in SENSOR_PINS:

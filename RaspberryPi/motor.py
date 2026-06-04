@@ -35,7 +35,6 @@ def rotate(motor, speed):
         stop_event_x.clear()
     elif motor == "Y":
         stop_event_y.clear()
-    print("DEBUG:", type(motor), repr(motor))
     if motor == "X":
         PUL = 14  # Pin 8  → GPIO14
         DIR = 15  # Pin 10 → GPIO15
@@ -56,8 +55,8 @@ def rotate(motor, speed):
     stop_event = stop_event_x if motor == "X" else stop_event_y
     while not stop_event.is_set():
         pause = 1 / (100* (speed + 7))
-        print(f"DEBUG: Geschwindigkeit {speed} ergibt Pause {pause}")
-        print("Richtwert für Pause ist 0.0002")
+        #print(f"DEBUG: Geschwindigkeit {speed} ergibt Pause {pause}")
+        #print("Richtwert für Pause ist 0.0002")
         lgpio.gpio_write(h, ENA, 0)
         
         for step in range(200000):

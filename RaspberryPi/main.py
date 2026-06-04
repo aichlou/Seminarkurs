@@ -34,7 +34,7 @@ while True:
         case "change_state":
             change = threading.Thread(target=webserver.set_state, args=args)
             change.start()
-            sensordata.put(command)
+            sensordata.put(*args)
         case "stop_motor":
             print("Stopping motor")
             motor.stop_motor(args[0])
