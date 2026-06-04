@@ -37,9 +37,11 @@ def host_server(commands):
     def status():
         return jsonify(get_states())
     
-    @app.route("/initialize")
+    @app.route("/init")
     def initialize():
-        commands.put(("initialize", ))
+        commands.put(("init", ))
         return jsonify({"ok": True})
+    
+    
 
     app.run(host="0.0.0.0", port=5000, debug=False, use_reloader=False)

@@ -1,6 +1,5 @@
 import time
 import threading
-# from ld import motor
 import lgpio
 stop_event_x = threading.Event()
 stop_event_y = threading.Event()
