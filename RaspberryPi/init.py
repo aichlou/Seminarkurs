@@ -11,3 +11,5 @@ def init(sensordata, commands):
         cmd = sensordata.get()
         pin, state = cmd
         print(f"Pin {pin} ist jetzt {state}")
+        if pin in (20, 21) and state == 1:
+            commands.put(("stop_motor", "X"))

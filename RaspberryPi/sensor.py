@@ -12,7 +12,7 @@ def read_sensors(commands):
     last_states = [False] * len(SENSOR_PINS)
     while True:
         for pin in SENSOR_PINS:
-            state = lgpio.gpio_read(h, pin)
+            state = not lgpio.gpio_read(h, pin)
             if (state != last_states[SENSOR_PINS.index(pin)]):
                 print(f"Sensor an Pin {pin}, mit dem Index {SENSOR_PINS.index(pin)} hat sich geändert zu {state}")
                 commands.put(("change_state", SENSOR_PINS.index(pin), state))
