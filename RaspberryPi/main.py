@@ -43,4 +43,4 @@ while True:
             init_thread = threading.Thread(target=init.init, args=(sensordata, commands, ))
             init_thread.start()
         case _:
-            raise Exception("This is an Error")
+            raise Exception(command)
