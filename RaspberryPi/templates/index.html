@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hochregallager Steuerung</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏭 Hochregallager Steuerung</h1>
+            <p class="subtitle">Beta-Modus • Manuelle Motorsteuerung <span class="status-indicator connected"></span></p>
+        </header>
+        
+        <div class="controls-grid">
+            <!-- X-Achse Motor -->
+            <div class="motor-card">
+                <div class="motor-header">
+                    <h2 class="motor-title">Motor X-Achse</h2>
+                    <span class="axis-label">Horizontal</span>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Geschwindigkeit</label>
+                    <div class="slider-container">
+                        <input type="range" id="speedX" class="slider" min="-100" max="100" value="0">
+                        <div class="value-display">
+                            <span>◄ Rückwärts</span>
+                            <span class="current-value" id="speedXValue">0%</span>
+                            <span>Vorwärts ►</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="action-button" id="actionX" onclick="Clicked('X')">
+                    Motor X Aktivieren
+                </button>
+            </div>
+            
+            <!-- Y-Achse Motor -->
+            <div class="motor-card">
+                <div class="motor-header">
+                    <h2 class="motor-title">Motor Y-Achse</h2>
+                    <span class="axis-label">Vertikal</span>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Geschwindigkeit</label>
+                    <div class="slider-container">
+                        <input type="range" id="speedY" class="slider" min="-100" max="100" value="0">
+                        <div class="value-display">
+                            <span>◄ Abwärts</span>
+                            <span class="current-value" id="speedYValue">0%</span>
+                            <span>Aufwärts ►</span>
+                        </div>
+                    </div>
+                </div>
+                 
+                <button class="action-button" id="actionY" onclick="Clicked('Y')" >
+                    Motor Y Aktivieren
+                </button>
+            </div>
+        </div>
+
+        <div>
+            <button class="action-button" id="init" onclick="init()">
+                init
+            </button>
+        </div>
+        
+        <!-- Sensoren -->
+        <div class="sensors-section">
+            <div class="sensors-header">
+                <h2 class="sensors-title">📡 Sensor Status</h2>
+                <p class="sensors-subtitle">Heberposition & Systemstatus</p>
+            </div>
+            <div class="sensors-grid" id="sensorsGrid">
+                <!-- Sensoren werden dynamisch geladen -->
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
