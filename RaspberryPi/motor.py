@@ -29,7 +29,7 @@ def setup_motors():
         lgpio.gpio_claim_output(h, DIR, 0)
         lgpio.gpio_claim_output(h, ENA, 0)
         lgpio.gpio_write(h, ENA, 0)
-        //lgpio.gpio_write(h, DIR, 1)
+        #lgpio.gpio_write(h, DIR, 1)
 def rotate(motor, speed):
     if motor == "X":
         stop_event_x.clear()

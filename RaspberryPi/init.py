@@ -4,7 +4,7 @@ import sensor
 
 def init(sensordata, commands):
     motor.setup_motors()
-   timedata = [0.0, 0.0]
+    timedata = [0.0, 0.0]
     print("Starte x-Achsen Motor")
     sensorcounter = 0
     speed = 0.7
