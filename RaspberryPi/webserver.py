@@ -46,7 +46,7 @@ def host_server(commands):
             wasInit = True
             return jsonify({"ok": True})
         else:
-            return jsonify({"404": False})
+            return jsonify({"409": False})
     
     
 
