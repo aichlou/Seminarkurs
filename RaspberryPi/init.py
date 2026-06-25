@@ -15,11 +15,33 @@ def init(sensordata, commands):
         cmd = sensordata.get()
         pin, state = cmd
         print(f"Pin {pin} ist jetzt {state}")
-        if pin in (0, 1) and state:
+        if sensorcounter == 0 and pin == 0 and state:
             timedata[sensorcounter] = time.time()
             commands.put(("stop_motor", "X"))
             speed = -speed
             sensorcounter += 1
+        if sensorcounter == 1 and pin == 1 and state:
+            timedata[sensorcounter] = time.time()
+            commands.put(("stop_motor", "X"))
+            speed = -speed
+            sensorcounter += 1
+    print("X-Achse der initialisierung abgeschlossen")
+    while sensorcounter < 4:
+        commands.put(("start_motor", "Y", speed))
+        cmd = sensordata.get()
+        pin, state = cmd
+        print(f"Pin {pin} ist jetzt {state}")
+        if sensorcounter == 2 and pin == 2 and state:
+            timedata[sensorcounter] = time.time()
+            commands.put(("stop_motor", "Y"))
+            speed = -speed
+            sensorcounter += 1
+        if sensorcounter == 3 and pin == 3 and state:
+            timedata[sensorcounter] = time.time()
+            commands.put(("stop_motor", "Y"))
+            speed = -speed
+            sensorcounter += 1
+        
 
     duration = timedata[1] - timedata[0]
     

@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, send_file, render_template
+import logging
 
 # Globale Zustände (z.B. Sensoren oder Motoren)
 states = [False, False, False, False]
@@ -16,6 +17,9 @@ def get_states():
 
 def host_server(commands):
     app = Flask(__name__)
+    
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.ERROR)
 
     @app.route("/")
     def index():
