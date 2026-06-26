@@ -26,6 +26,7 @@ def init(sensordata, commands):
             speed = -speed
             sensorcounter += 1
     print("X-Achse der initialisierung abgeschlossen")
+    speed = 0.4
     while sensorcounter < 4:
         commands.put(("start_motor", "Y", speed))
         cmd = sensordata.get()
