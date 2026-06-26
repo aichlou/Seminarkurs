@@ -1,20 +1,29 @@
 import lgpio
 import time
-import threading
+
+SENSOR_PINS = [20, 21, 26, 19]
+INVERT_PINS = {26, 19}
+
 
 def read_sensors(commands):
     print("Starte Sensor-Lesefunktion")
     h = lgpio.gpiochip_open(0)
-    SENSOR_PINS = [20, 21, 26, 19]
     for pin in SENSOR_PINS:
         lgpio.gpio_claim_input(h, pin, lgpio.SET_PULL_UP)
-    states = [False] * len(SENSOR_PINS)
-    last_states = [False] * len(SENSOR_PINS)
+
+    last_states = [None] * len(SENSOR_PINS)
+
     while True:
-        for pin in SENSOR_PINS:
-            state = lgpio.gpio_read(h, pin) if pin in (26, 19) else not lgpio.gpio_read(h, pin) 
-            if (state != last_states[SENSOR_PINS.index(pin)]):
-                print(f"Sensor an Pin {pin}, mit dem Index {SENSOR_PINS.index(pin)} hat sich geändert zu {state}")
-                commands.put(("change_state", SENSOR_PINS.index(pin), state))
-            last_states[SENSOR_PINS.index(pin)] = state
-        time.sleep(0.001)
+        for index, pin in enumerate(SENSOR_PINS):
+            raw_state = lgpio.gpio_read(h, pin)
+            state = not raw_state if pin in INVERT_PINS else raw_state
+            if last_states[index] is None:
+                last_states[index] = state
+                continue
+
+            if state != last_states[index]:
+                print(f"Sensor an Pin {pin} (Index {index}) hat sich geändert zu {state}")
+                commands.put(("change_state", index, state))
+                last_states[index] = state
+
+        time.sleep(0.01)

@@ -1,102 +1,107 @@
 import time
 import threading
 import lgpio
+
 stop_event_x = threading.Event()
 stop_event_y = threading.Event()
 h = None
+
+MOTOR_PINS = {
+    "X": {"PUL": 14, "DIR": 15, "ENA": 18},
+    "Y": {"PUL": 17, "DIR": 27, "ENA": 22},
+}
+
+
+def get_handle():
+    global h
+    if h is None:
+        h = lgpio.gpiochip_open(0)
+    return h
+
 
 def setup_motors():
     global h
     if h is not None:
         try:
             lgpio.gpiochip_close(h)
-        except:
+        except Exception:
             pass
     h = lgpio.gpiochip_open(0)
-    for motor in range(2):
-        if motor == 0:
-            PUL = 14  # Pin 8  → GPIO14
-            DIR = 15  # Pin 10 → GPIO15
-            ENA = 18  # Pin 12 → GPIO18
-        elif motor == 1:
-            PUL = 17  # Pin 11 → GPIO17
-            DIR = 27  # Pin 13 → GPIO27
-            ENA = 22  # Pin 15 → GPIO22
-        else :
-            print("Ungültiger Motorindex:", repr(motor))
-            raise ValueError("Ungültiger Motorindex")
-        lgpio.gpio_claim_output(h, PUL, 0)
-        lgpio.gpio_claim_output(h, DIR, 0)
-        lgpio.gpio_claim_output(h, ENA, 0)
-        lgpio.gpio_write(h, ENA, 0)
-        #lgpio.gpio_write(h, DIR, 1)
-def rotate(motor, speed):
-    if motor == "X":
-        stop_event_x.clear()
-    elif motor == "Y":
-        stop_event_y.clear()
-    if motor == "X":
-        PUL = 14  # Pin 8  → GPIO14
-        DIR = 15  # Pin 10 → GPIO15
-        ENA = 18  # Pin 12 → GPIO18
-    elif motor == "Y":
-        PUL = 17  # Pin 11 → GPIO17
-        DIR = 27  # Pin 13 → GPIO27
-        ENA = 22  # Pin 15 → GPIO22
-    else:
-        print("Ungültiger Motorindex:", repr(motor))
+
+    for axis, pins in MOTOR_PINS.items():
+        lgpio.gpio_claim_output(h, pins["PUL"], 0)
+        lgpio.gpio_claim_output(h, pins["DIR"], 0)
+        lgpio.gpio_claim_output(h, pins["ENA"], 0)
+        lgpio.gpio_write(h, pins["ENA"], 1)
+
+
+def rotate(axis, speed):
+    handle = get_handle()
+    if axis not in MOTOR_PINS:
+        print("Ungültiger Motorindex:", repr(axis))
         raise ValueError("Ungültiger Motorindex")
-    if(speed < 0):
-        print("DREHUNG IN ANDERE RICHTUNG")
-        lgpio.gpio_write(h, DIR, 1)
-        speed = -speed
+
+    if axis == "X":
+        stop_event_x.clear()
+        stop_event = stop_event_x
     else:
-        lgpio.gpio_write(h, DIR, 0)
-    print(f"Starte Motor {motor} mit Geschwindigkeit {speed}")
-    stop_event = stop_event_x if motor == "X" else stop_event_y
-    while not stop_event.is_set():
-        pause = 1 / (100* (speed + 7))
-        #print(f"DEBUG: Geschwindigkeit {speed} ergibt Pause {pause}")
-        #print("Richtwert für Pause ist 0.0002")
-        lgpio.gpio_write(h, ENA, 0)
-        
-        for step in range(200000):
-            if stop_event.is_set():
-                print("Stop Event erkannt, Motor wird gestoppt")
-                break
-            lgpio.gpio_write(h, PUL, 1)
+        stop_event_y.clear()
+        stop_event = stop_event_y
+
+    pins = MOTOR_PINS[axis]
+    if speed == 0:
+        lgpio.gpio_write(handle, pins["ENA"], 1)
+        print(f"Motor {axis} wurde nicht gestartet: Geschwindigkeit ist 0")
+        return
+
+    direction = 1 if speed < 0 else 0
+    lgpio.gpio_write(handle, pins["DIR"], direction)
+    lgpio.gpio_write(handle, pins["ENA"], 0)
+    speed = abs(speed)
+    pause = 1 / (100 * (speed + 7))
+
+    print(f"Starte Motor {axis} mit Geschwindigkeit {speed}, Richtung {direction}")
+    try:
+        while not stop_event.is_set():
+            lgpio.gpio_write(handle, pins["PUL"], 1)
             time.sleep(pause)
-            lgpio.gpio_write(h, PUL, 0)
+            lgpio.gpio_write(handle, pins["PUL"], 0)
             time.sleep(pause)
-        
-        lgpio.gpio_write(h, ENA, 1)
-    print("Motor gestoppt")
-    lgpio.gpio_write(h, ENA, 0)
-    lgpio.gpio_write(h, DIR, 0)
+    except Exception as exc:
+        print("Fehler beim Drehen des Motors:", exc)
+    finally:
+        lgpio.gpio_write(handle, pins["ENA"], 1)
+        lgpio.gpio_write(handle, pins["DIR"], 0)
+        print("Motor gestoppt")
 
 
-def stop_motor(motor):
-    if motor == "X":
+def stop_motor(axis):
+    if axis == "X":
         stop_event_x.set()
-    elif motor == "Y":
+    elif axis == "Y":
         stop_event_y.set()
     else:
-        print("Ungültiger Motorindex zum Stoppen:", repr(motor))
+        print("Ungültiger Motorindex zum Stoppen:", repr(axis))
         raise ValueError("Ungültiger Motorindex zum Stoppen")
-    #ENA muss noch auf 1 gesetzt werden
     print("Stop Event gesetzt")
-
 
 
 def cleanup():
     global h
-    lgpio.gpiochip_write(18, 0)
-    lgpio.gpiochip_write(22, 0)
-    lgpio.gpiochip_close(h)
+    if h is None:
+        return
+
+    for pins in MOTOR_PINS.values():
+        try:
+            lgpio.gpio_write(h, pins["ENA"], 1)
+            lgpio.gpio_write(h, pins["DIR"], 0)
+        except Exception:
+            pass
+
+    try:
+        lgpio.gpiochip_close(h)
+    except Exception:
+        pass
+
+    h = None
     print("GPIOs freigegeben")
-
-
-
-#setup_motors()
-#rotate("X", -0.7)
-#rotate("Y", 0.7)

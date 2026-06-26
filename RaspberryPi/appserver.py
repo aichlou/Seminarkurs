@@ -21,7 +21,7 @@ def fetch():
     })
 
 @app.errorhandler(404)
-def not_found(error):    
+def not_found(error):
     return "Error: Route nicht gefunden"
 
 if __name__ == '__main__':

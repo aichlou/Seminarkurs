@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 import subprocess
-import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from socketserver import ThreadingMixIn
 
 PORT = 8080
+
+
+class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
+    daemon_threads = True
+
 
 class StreamHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
@@ -29,8 +34,7 @@ class StreamHandler(BaseHTTPRequestHandler):
 
         elif self.path == '/stream':
             self.send_response(200)
-            self.send_header('Content-Type',
-                             'multipart/x-mixed-replace; boundary=frame')
+            self.send_header('Content-Type', 'multipart/x-mixed-replace; boundary=frame')
             self.end_headers()
 
             cmd = [
@@ -39,25 +43,24 @@ class StreamHandler(BaseHTTPRequestHandler):
                 '--width', '1280',
                 '--height', '720',
                 '--framerate', '30',
-                '--timeout', '0',   # läuft endlos
-                '-o', '-'           # Ausgabe auf stdout
+                '--timeout', '0',
+                '-o', '-'
             ]
 
+            proc = None
             try:
-                proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                                        stderr=subprocess.DEVNULL)
+                proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
                 buf = b''
                 while True:
                     chunk = proc.stdout.read(4096)
                     if not chunk:
                         break
                     buf += chunk
-                    # JPEG-Frames erkennen (SOI/EOI Marker)
                     start = buf.find(b'\xff\xd8')
-                    end   = buf.find(b'\xff\xd9')
+                    end = buf.find(b'\xff\xd9')
                     if start != -1 and end != -1 and end > start:
-                        jpg = buf[start:end+2]
-                        buf = buf[end+2:]
+                        jpg = buf[start:end + 2]
+                        buf = buf[end + 2:]
                         try:
                             self.wfile.write(
                                 b'--frame\r\n'
@@ -69,11 +72,19 @@ class StreamHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 print(f"Fehler: {e}")
             finally:
-                proc.terminate()
+                if proc is not None:
+                    proc.terminate()
 
         else:
             self.send_response(404)
             self.end_headers()
 
-print(f"Stream läuft auf http://<RPi-IP>:{PORT}")
-HTTPServer(('0.0.0.0', PORT), StreamHandler).serve_forever()
+
+def main():
+    print(f"Stream läuft auf http://<RPi-IP>:{PORT}")
+    with ThreadingHTTPServer(('0.0.0.0', PORT), StreamHandler) as server:
+        server.serve_forever()
+
+
+if __name__ == '__main__':
+    main()
