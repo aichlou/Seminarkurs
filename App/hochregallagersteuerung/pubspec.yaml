@@ -59,6 +59,7 @@ flutter:
     - assets/animations/Loading Dots Blue.json
     - assets/animations/Empty box.json
     - assets/animations/Not Found.json
+    - assets/animations/Loading.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

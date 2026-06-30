@@ -44,9 +44,19 @@ class _HomePageState extends State<HomePage> {
       return LoadArticles();
     }
     else if(content[0] == 'Error') {
-      return NotFound();
+      return NoArticles();
     }
-    return showArticles();
+    else if(content[0] == 'init') {
+      return initWidget();
+    }
+    else if(content[0] == 'initialising') {
+      return InitState();
+    }
+    else {
+      debugPrint(content.toString());
+      debugPrint('ARTIKEL WERDEN ANGEZEIGT');
+      return showArticles();
+    }
   }
 
   Widget showArticles() {
@@ -148,13 +158,18 @@ class _HomePageState extends State<HomePage> {
       content = ['Search'];
       setState(() {});
       final response = await http.get(
-        Uri.parse('http://$ipAddr:5000/fetch')
+        Uri.parse('http://$ipAddr:5001/fetch')
       );
       debugPrint('Antwort: ${response.body}');
       content = [response.body];
-      data = jsonDecode(response.body);
-      if (content[0] == 'Kein Inhalt') {
-        content = [];
+      if (content[0] == "init") {
+        content = ['init'];
+      }
+      else {
+        data = jsonDecode(response.body);
+        if (content[0] == 'Kein Inhalt') {
+          content = [];
+        }
       }
       setState(() {});
     }
@@ -174,6 +189,20 @@ class _HomePageState extends State<HomePage> {
       return [['Error']];
     }
     return [['']];
+  }
+
+  Future<void> initRequest() async {
+    content = ['Search'];
+    setState(() {});
+    final response = await http.get(
+      Uri.parse('http://$ipAddr:5001/init')
+    );
+    debugPrint('Antwort init Request: ${response.body}');
+    if (response.body == 'OK') {
+      content = ['initialising'];
+    }
+    setState(() {});
+    return;
   }
 
   @override
@@ -240,6 +269,13 @@ class _HomePageState extends State<HomePage> {
       )
     );
   }
+
+  Widget initWidget () {
+    return TextButton(
+      onPressed: initRequest,
+      child: Text('Initialise'),
+    );
+  }
 }
 
 class LoadArticles extends StatelessWidget {
@@ -300,6 +336,25 @@ class NotFound extends StatelessWidget {
   }
 }
 
+class InitState extends StatelessWidget {
+  const InitState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text('Initialising'),
+        Lottie.asset(
+          'assets/animations/Loading.json',
+          width: 250,
+          height: 250,
+          repeat: true,
+        )
+      ]
+    );
+  }
+}
+
 class Nothing extends StatelessWidget {
   const Nothing({super.key});
 
@@ -308,3 +363,4 @@ class Nothing extends StatelessWidget {
     return Column();
   }
 }
+
