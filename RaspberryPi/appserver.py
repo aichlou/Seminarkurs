@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
+isInit: Optional[bool] = None
+counter = 0
 
 @app.route('/message')
 def recieve_message():
@@ -8,23 +10,37 @@ def recieve_message():
 
 @app.route('/fetch')
 def fetch():
-    return 'init'
-    #return jsonify({
-    #   "1": {"name": "Max", "age": 20},
-    #    "2": {"name": "Anna", "age": 25},
-    #    "3": {"name": "Bob", "age": 35},
-    #    "4": {"name": "Lennards", "age": 30},
-    #    "5": {"name": "Anna", "age": 25},
-    #    "6": {"name": "Bob", "age": 35},
-    #    "7": {"name": "Max", "age": 30},
-    #    "8": {"name": "Anna", "age": 25},
-    #    "9": {"name": "Bob", "age": 35},
-    #})
+    if counter < 20:
+        return 'init'
+    else:
+        return jsonify({
+        "1": {"name": "Max", "age": 20},
+            "2": {"name": "Anna", "age": 25},
+            "3": {"name": "Bob", "age": 35},
+            "4": {"name": "Lennards", "age": 30},
+            "5": {"name": "Anna", "age": 25},
+            "6": {"name": "Bob", "age": 35},
+            "7": {"name": "Max", "age": 30},
+            "8": {"name": "Anna", "age": 25},
+            "9": {"name": "Bob", "age": 35},
+        })
     
 @app.route('/init')
 def init():
-    return 'OK'
-
+    global counter, isInit
+    counter = counter + 1
+    if counter > 20:
+        isInit = False
+    if isInit is None:
+        isInit = True
+        return 'OK'
+    elif isInit is True:
+        return 'IS'
+    elif isInit is False:
+        return 'NO'
+    else:
+        return 'Error'
+    
 @app.errorhandler(404)
 def not_found(error):
     return "Error: Route nicht gefunden"

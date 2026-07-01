@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
@@ -37,14 +39,14 @@ class _HomePageState extends State<HomePage> {
 
   Widget contentVerarbeiten() {
     debugPrint('Content Verarbeiten Funktion: $content');
-    if(content.isEmpty) {
+    if(content.isEmpty || content[0] == '') {
       return NoArticles();
     }
     else if(content[0] == 'Search') {
       return LoadArticles();
     }
     else if(content[0] == 'Error') {
-      return NoArticles();
+      return NotFound();
     }
     else if(content[0] == 'init') {
       return initWidget();
@@ -192,16 +194,30 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> initRequest() async {
-    content = ['Search'];
-    setState(() {});
+    //content = ['Search'];
+    //setState(() {});
     final response = await http.get(
       Uri.parse('http://$ipAddr:5001/init')
     );
     debugPrint('Antwort init Request: ${response.body}');
-    if (response.body == 'OK') {
-      content = ['initialising'];
+    switch(response.body) {
+      case 'OK':
+      case 'IS':
+        content = ['initialising'];
+        break;
+      case 'NO':
+        content = [''];
+        break;
     }
+    debugPrint(content.toString());
     setState(() {});
+    if (content[0] == 'initialising') {
+      await Future.delayed(Duration(seconds: 2));
+      initRequest();
+    }
+    else {
+      fetchContent();
+    }
     return;
   }
 
