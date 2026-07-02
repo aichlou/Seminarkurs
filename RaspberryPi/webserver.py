@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template
 import logging
 
 # Globale Zustände (z.B. Sensoren oder Motoren)
-states = [False, False, False, False]
+states = [False, False, False, False, False, False]
 was_init = False
 
 

@@ -39,7 +39,7 @@ def main():
 
     try:
         while True:
-            print("Warte auf Befehle...")
+           #xprint("Warte auf Befehle...")
             try:
                 cmd = commands.get(timeout=1)
             except Empty:
