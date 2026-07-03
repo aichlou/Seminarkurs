@@ -52,14 +52,14 @@ def init(sensordata, commands):
     _clear_queue(sensordata)
 
     try:
-        duration_x = _home_axis("X", commands, sensordata, speed=0.7)
+        duration_x = _home_axis("X", commands, sensordata, speed=0.25)
         print("X-Achse der Initialisierung abgeschlossen")
     except TimeoutError as exc:
         print("Initialisierung X-Achse fehlgeschlagen:", exc)
         return
 
     try:
-        _home_axis("Y", commands, sensordata, speed=0.4)
+        _home_axis("Y", commands, sensordata, speed=0.25)
         print("Y-Achse der Initialisierung abgeschlossen")
     except TimeoutError as exc:
         print("Initialisierung Y-Achse fehlgeschlagen:", exc)
@@ -67,6 +67,6 @@ def init(sensordata, commands):
 
     unit = duration_x / 5
     print(f"Bewege X-Achse um eine Einheit: {unit:.3f} Sekunden")
-    commands.put(("start_motor", "X", 0.4))
+    commands.put(("start_motor", "X", 0.25))
     time.sleep(unit)
     commands.put(("stop_motor", "X"))

@@ -61,7 +61,7 @@ def rotate(axis, speed):
     lgpio.gpio_write(handle, pins["DIR"], direction)
     lgpio.gpio_write(handle, pins["ENA"], 0)
     speed = abs(speed)
-    pause = 1 / (100 * (speed + 7))
+    pause = 1 / (40 * (speed + 10))
 
     print(f"Starte Motor {axis} mit Geschwindigkeit {speed}, Richtung {direction}")
     try:

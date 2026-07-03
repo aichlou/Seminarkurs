@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template
 import logging
 
 # Globale Zustände (z.B. Sensoren oder Motoren)
-states = [False, False, False, False, False, False]
+states = [False, False, False, False, False, False, False]
 was_init = False
 
 
@@ -57,13 +57,16 @@ def host_server(commands):
     def status():
         return jsonify(get_states())
 
-    @app.route("/init", methods=["POST"])
+    @app.route("/init", methods=["GET"])
     def initialize():
+        print("INIT WURDE GEDRÜCKT")
         global was_init
         if not was_init:
+            print("STARTE INIT VON WEBSERVER AUS")
             commands.put(("init",))
             was_init = True
             return jsonify({"ok": True}), 200
+        print("System ist bereits initialisiert")
         return jsonify({"error": "Bereits initialisiert"}), 409
 
     app.run(host="0.0.0.0", port=5000, debug=False, use_reloader=False)
