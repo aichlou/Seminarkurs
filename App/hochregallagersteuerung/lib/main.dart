@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
@@ -86,16 +84,42 @@ class _HomePageState extends State<HomePage> {
           width: 3
         )
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            article['name'],
-            style: TextStyle(
-              fontSize: 20,
-            ),  
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                article['name'],
+                style: TextStyle(
+                  fontSize: 20,
+                ),  
+              ),
+              Text(article['age'].toString())
+            ],
           ),
-          Text(article['age'].toString())
+          Spacer(),
+          IconButton(
+            icon: Icon(Icons.start),
+            onPressed: () async {
+              final response = await http.get(
+                Uri.parse('http://$ipAddr:5001/return?id=${article['id']}')
+              );
+              debugPrint('Antwort: ${response.body}');
+              content = [response.body];
+              if (content[0] == "init") {
+                content = ['init'];
+              }
+              else {
+                data = jsonDecode(response.body);
+                if (content[0] == 'Kein Inhalt') {
+                  content = [];
+                }
+              }
+              setState(() {});
+            }
+          ),
+          //SizedBox(width: 10,),
         ],
       ),
     );

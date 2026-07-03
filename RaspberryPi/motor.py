@@ -4,6 +4,7 @@ import lgpio
 
 stop_event_x = threading.Event()
 stop_event_y = threading.Event()
+stop_event_z = threading.Event()
 h = None
 
 MOTOR_PINS = {
@@ -34,7 +35,6 @@ def setup_motors():
         lgpio.gpio_claim_output(h, pins["ENA"], 0)
         lgpio.gpio_write(h, pins["ENA"], 1)
 
-
 def rotate(axis, speed):
     handle = get_handle()
     if axis not in MOTOR_PINS:
@@ -44,9 +44,12 @@ def rotate(axis, speed):
     if axis == "X":
         stop_event_x.clear()
         stop_event = stop_event_x
-    else:
+    elif axis == "Y":
         stop_event_y.clear()
         stop_event = stop_event_y
+    else:
+        stop_event_z.clear()
+        stop_event = stop_event_z
 
     pins = MOTOR_PINS[axis]
     if speed == 0:
