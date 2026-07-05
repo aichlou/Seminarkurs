@@ -1,7 +1,7 @@
 import lgpio
 import time
 
-SENSOR_PINS = [20, 21, 26, 19, 13, 2]
+SENSOR_PINS = [20, 21, 19, 26, 13, 2]
 INVERT_PINS = [20, 21]
 
 

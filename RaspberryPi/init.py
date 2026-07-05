@@ -16,7 +16,7 @@ def _clear_queue(queue):
             break
 
 
-def _wait_for_sensor(sensordata, index, timeout=15):
+def _wait_for_sensor(sensordata, index, timeout=50):
     start_time = time.time()
     while True:
         try:
