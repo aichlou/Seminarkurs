@@ -149,7 +149,7 @@ def cli():
                 if len(command) < 2:
                     print("Fehler: get_pos <axis> (z.B. get_pos X)")
                     continue
-                get_Pos(command[1])
+                print(get_Pos(command[1]))
             
             elif cmd == "set_null":
                 set_null()
@@ -163,9 +163,12 @@ def cli():
                     print("Beispiel: rotate X 100 oder rotate X 100 1000")
                     continue
                 axis = command[1]
-                speed = int(command[2])
+                speed = float(command[2])
                 border = int(command[3]) if len(command) > 3 else None
-                rotate(axis, speed, border)
+                try:
+                    rotate(axis, speed, border)
+                except KeyboardInterrupt:
+                    print("\nAbgebrochen!")
             
             elif cmd == "stop":
                 if len(command) < 2:
