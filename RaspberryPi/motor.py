@@ -1,6 +1,7 @@
 import time
 import threading
 import lgpio
+import sys
 
 stop_event_x = threading.Event()
 stop_event_y = threading.Event()
@@ -12,6 +13,13 @@ MOTOR_PINS = {
     "Y": {"PUL": 17, "DIR": 27, "ENA": 22},
 }
 
+POS = {
+    "X": 0,
+    "Y": 0,
+}
+
+def get_Pos(axis):
+    return POS[axis]
 
 def get_handle():
     global h
@@ -19,6 +27,9 @@ def get_handle():
         h = lgpio.gpiochip_open(0)
     return h
 
+def set_null():
+    POS["X"] = 0
+    POS["Y"] = 0
 
 def setup_motors():
     global h
@@ -35,7 +46,14 @@ def setup_motors():
         lgpio.gpio_claim_output(h, pins["ENA"], 0)
         lgpio.gpio_write(h, pins["ENA"], 1)
 
-def rotate(axis, speed):
+def goto(axis, target):
+    pos = get_Pos(axis)
+    if pos > target:
+        rotate(axis, 0.4, target)
+    elif pos < target:
+        rotate(axis, -0.4, target)
+
+def rotate(axis, speed, border = None):
     handle = get_handle()
     if axis not in MOTOR_PINS:
         print("Ungültiger Motorindex:", repr(axis))
@@ -70,6 +88,9 @@ def rotate(axis, speed):
             time.sleep(pause)
             lgpio.gpio_write(handle, pins["PUL"], 0)
             time.sleep(pause)
+            POS[axis] = POS[axis] + ((direction * 2) - 1)
+            if border is not None and border == POS[axis]:
+                stop_event.set()
     except Exception as exc:
         print("Fehler beim Drehen des Motors:", exc)
     finally:
@@ -108,3 +129,75 @@ def cleanup():
 
     h = None
     print("GPIOs freigegeben")
+
+def cli():
+    """Einfache CLI für Motor-Kontrolle"""
+    print("=== Motor Control CLI ===")
+    print("Befehle: get_pos, set_null, setup, rotate, stop, cleanup, exit, goto")
+    print()
+    
+    while True:
+        try:
+            command = input("> ").strip().split()
+            
+            if not command:
+                continue
+            
+            cmd = command[0]
+            
+            if cmd == "get_pos":
+                if len(command) < 2:
+                    print("Fehler: get_pos <axis> (z.B. get_pos X)")
+                    continue
+                get_Pos(command[1])
+            
+            elif cmd == "set_null":
+                set_null()
+            
+            elif cmd == "setup":
+                setup_motors()
+            
+            elif cmd == "rotate":
+                if len(command) < 3:
+                    print("Fehler: rotate <axis> <speed> [border]")
+                    print("Beispiel: rotate X 100 oder rotate X 100 1000")
+                    continue
+                axis = command[1]
+                speed = int(command[2])
+                border = int(command[3]) if len(command) > 3 else None
+                rotate(axis, speed, border)
+            
+            elif cmd == "stop":
+                if len(command) < 2:
+                    print("Fehler: stop <axis> (z.B. stop X)")
+                    continue
+                stop_motor(command[1])
+            
+            elif cmd == "cleanup":
+                cleanup()
+            
+            elif cmd == "exit" or cmd == "quit":
+                print("Auf Wiedersehen!")
+                break
+            
+            elif cmd == "goto":
+                if len(command) < 3:
+                    print("Fehler: goto <axis> <target>")
+                    continue
+                axis = command[1].upper()
+                target = int(command[2])
+                goto(axis, target)
+            
+            else:
+                print(f"Unbekannter Befehl: {cmd}")
+        
+        except ValueError as e:
+            print(f"Fehler bei der Eingabe: {e}")
+        except KeyboardInterrupt:
+            print("\nAbgebrochen")
+            break
+        except Exception as e:
+            print(f"Fehler: {e}")
+
+if __name__ == "__main__":
+    cli()

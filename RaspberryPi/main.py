@@ -39,7 +39,6 @@ def main():
 
     try:
         while True:
-           #xprint("Warte auf Befehle...")
             try:
                 cmd = commands.get(timeout=1)
             except Empty:
@@ -62,6 +61,8 @@ def main():
                     print("Initializing system")
                     init_thread = threading.Thread(target=init.init, args=(sensordata, commands), daemon=True)
                     init_thread.start()
+                case "0":
+                    motor.set_null()
                 case _:
                     print(f"Unbekannter Befehl erhalten: {command}")
     except KeyboardInterrupt:

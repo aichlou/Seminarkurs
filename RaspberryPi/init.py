@@ -30,7 +30,7 @@ def _wait_for_sensor(sensordata, index, timeout=50):
             return time.time()
 
 
-def _home_axis(axis, commands, sensordata, speed=0.7):
+def _home_axis(axis, commands, sensordata, speed=0.4): #0.7
     first_index, second_index = SENSOR_SIDES[axis]
     print(f"Initialisiere Achse {axis} - erste Position")
     commands.put(("start_motor", axis, speed))
@@ -67,6 +67,8 @@ def init(sensordata, commands):
 
     unit = duration_x / 5
     print(f"Bewege X-Achse um eine Einheit: {unit:.3f} Sekunden")
+    commands.put(("0"))
+    time.sleep(0.01)
     commands.put(("start_motor", "X", 0.25))
     time.sleep(unit)
     commands.put(("stop_motor", "X"))
