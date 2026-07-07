@@ -33,6 +33,7 @@ class _HomePageState extends State<HomePage> {
   String ipAddr = '127.0.0.1';
   final TextEditingController _controller = TextEditingController();
   List<String> content = ['Search'];
+  List<String> addContent = [''];
   Map<String, dynamic> data = {'default': 'default'};
 
   Widget contentVerarbeiten() {
@@ -218,8 +219,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> initRequest() async {
-    //content = ['Search'];
-    //setState(() {});
     final response = await http.get(
       Uri.parse('http://$ipAddr:5001/init')
     );
@@ -241,6 +240,28 @@ class _HomePageState extends State<HomePage> {
     }
     else {
       fetchContent();
+    }
+    return;
+  }
+
+  Future<void> isSet() async {
+    final response = await http.get(
+      Uri.parse('http://$ipAddr:5001/isset')
+    );
+    debugPrint('Antwort isSet Request: ${response.body}');
+    switch(response.body) {
+      case 'YES':
+        
+        break;
+      case 'NO':
+
+        break;
+    }
+    debugPrint(addContent.toString());
+    setState(() {});
+    if (addContent[0] == 'NO') {
+      await Future.delayed(Duration(seconds: 2));
+      isSet();
     }
     return;
   }
