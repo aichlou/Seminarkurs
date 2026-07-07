@@ -16,11 +16,11 @@ def _clear_queue(queue):
             break
 
 
-def _wait_for_sensor(sensordata, index, timeout=50):
+def _wait_for_sensor(sensordata, index, timeout=500):
     start_time = time.time()
     while True:
         try:
-            pin, state = sensordata.get(timeout=0.5)
+            pin, state = sensordata.get(timeout=0.01)
         except Empty:
             if time.time() - start_time > timeout:
                 raise TimeoutError(f"Sensor {index} wurde nicht rechtzeitig ausgelöst")
@@ -69,6 +69,6 @@ def init(sensordata, commands):
     print(f"Bewege X-Achse um eine Einheit: {unit:.3f} Sekunden")
     commands.put(("0"))
     time.sleep(0.01)
-    commands.put(("start_motor", "X", 0.25))
-    time.sleep(unit)
-    commands.put(("stop_motor", "X"))
+    #commands.put(("start_motor", "X", 0.25))
+    #time.sleep(unit)
+    #commands.put(("stop_motor", "X"))
