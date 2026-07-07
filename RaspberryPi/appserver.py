@@ -14,7 +14,7 @@ def fetch():
         return 'init'
     else:
         return jsonify({
-        "1": {"name": "Max", "age": 20},
+            "1": {"name": "Max", "age": 20},
             "2": {"name": "Anna", "age": 25},
             "3": {"name": "Bob", "age": 35},
             "4": {"name": "Lennards", "age": 30},
@@ -23,6 +23,10 @@ def fetch():
             "7": {"name": "Max", "age": 30},
             "8": {"name": "Anna", "age": 25},
             "9": {"name": "Bob", "age": 35},
+            "10": {"name": "Bob", "age": 35},
+            "11": {"name": "Max", "age": 30},
+            "12": {"name": "Anna", "age": 25},
+            "13": {"name": "Bob", "age": 35},
         })
     
 @app.route('/init')
@@ -40,6 +44,11 @@ def init():
         return 'NO'
     else:
         return 'Error'
+    
+@app.route('/return')
+def ret():
+    id = request.args.get('id')
+    return "id"
     
 @app.errorhandler(404)
 def not_found(error):

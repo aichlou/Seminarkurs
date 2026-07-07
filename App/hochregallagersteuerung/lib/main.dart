@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/gestures.dart';
 
 void main() {
   runApp(MyApp());
@@ -16,6 +17,13 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: .fromSeed(seedColor: Colors.blue),
+      ),
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices: {
+          PointerDeviceKind.touch,
+          PointerDeviceKind.mouse, // <-- Aktiviert Maus-Wischen!
+          PointerDeviceKind.trackpad,
+        },
       ),
       home: const HomePage(title: 'Hochregallagersteuerung'),
     );
@@ -61,14 +69,32 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget showArticles() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        for (var entry in data.entries) ...[
-          showArticle(entry.value),
-          SizedBox(height: 10,),
-        ]
-      ],
+    for (var entry in data.entries) {
+      debugPrint(entry.key);
+    }
+    return RefreshIndicator(
+      triggerMode: RefreshIndicatorTriggerMode.onEdge,
+      onRefresh: () => fetchContent(showContent: false),
+      child: ListView(
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        children: [
+          for (var entry in data.entries) ...[
+            Dismissible(
+              key: Key(entry.key),
+              background: Container(
+                color: Colors.red,
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.all(20),
+                child: const Icon(Icons.delete, color: Colors.white),
+              ),
+              child: showArticle(entry.value),
+            ),
+            //const SizedBox(height: 6,),
+          ]
+        ],
+      )
     );
   }
 
@@ -102,21 +128,11 @@ class _HomePageState extends State<HomePage> {
           Spacer(),
           IconButton(
             icon: Icon(Icons.start),
-            onPressed: () async {
+            onPressed: () async { // FAAA: Programm ist so lange freez bis antwort kommt
               final response = await http.get(
                 Uri.parse('http://$ipAddr:5001/return?id=${article['id']}')
               );
-              debugPrint('Antwort: ${response.body}');
-              content = [response.body];
-              if (content[0] == "init") {
-                content = ['init'];
-              }
-              else {
-                data = jsonDecode(response.body);
-                if (content[0] == 'Kein Inhalt') {
-                  content = [];
-                }
-              }
+              debugPrint('Antwort auf Return: ${response.body}');
               setState(() {});
             }
           ),
@@ -180,10 +196,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<List<List<String>>> fetchContent() async {
+  Future<List<List<String>>> fetchContent({bool showContent = false}) async {
     try {
       content = ['Search'];
-      setState(() {});
+      if (showContent) setState(() {});
       final response = await http.get(
         Uri.parse('http://$ipAddr:5001/fetch')
       );
@@ -198,7 +214,7 @@ class _HomePageState extends State<HomePage> {
           content = [];
         }
       }
-      setState(() {});
+      if (showContent) setState(() {});
     }
     catch (error) {
       debugPrint(error.toString()); //Server nicht gefunden vmtl
@@ -212,7 +228,7 @@ class _HomePageState extends State<HomePage> {
         debugPrint('Ein Unbekannter Fehler ist aufgetreten. Probleme mit der Connection zum Server');
       }
       content = ['Error'];
-      setState(() {});
+      if (showContent) setState(() {});
       return [['Error']];
     }
     return [['']];
@@ -295,17 +311,7 @@ class _HomePageState extends State<HomePage> {
             SizedBox(width: 10)
         ],
       ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: .start,
-            children: [
-              SizedBox(height: 10,),
-              contentVerarbeiten(),
-            ],
-          ),
-        ),
-      ),
+      body: contentVerarbeiten(),
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -366,6 +372,7 @@ class NoArticles extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        SizedBox(height: 10,),
         Text("Keine Artikel im Lager"),
         Lottie.asset(
           'assets/animations/Empty box.json',
@@ -385,6 +392,7 @@ class NotFound extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        SizedBox(height: 10,),
         Text('Ip-Adresse nicht gefunden'),
         Lottie.asset(
           'assets/animations/Not Found.json',
@@ -404,6 +412,7 @@ class InitState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        SizedBox(height: 10,),
         Text('Initialising'),
         Lottie.asset(
           'assets/animations/Loading.json',
