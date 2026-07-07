@@ -49,9 +49,9 @@ def setup_motors():
 def goto(axis, target):
     pos = get_Pos(axis)
     if pos > target:
-        rotate(axis, 0.4, target)
-    elif pos < target:
         rotate(axis, -0.4, target)
+    elif pos < target:
+        rotate(axis, 0.4, target)
 
 def rotate(axis, speed, border = None):
     handle = get_handle()
@@ -88,7 +88,7 @@ def rotate(axis, speed, border = None):
             time.sleep(pause)
             lgpio.gpio_write(handle, pins["PUL"], 0)
             time.sleep(pause)
-            POS[axis] = POS[axis] + ((direction * 2) - 1)
+            POS[axis] = POS[axis] - ((direction * 2) - 1)
             if border is not None and border == POS[axis]:
                 stop_event.set()
     except Exception as exc:
