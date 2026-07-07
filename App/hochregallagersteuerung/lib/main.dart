@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         dragDevices: {
           PointerDeviceKind.touch,
-          PointerDeviceKind.mouse, // <-- Aktiviert Maus-Wischen!
+          PointerDeviceKind.mouse,
           PointerDeviceKind.trackpad,
         },
       ),
@@ -72,28 +72,34 @@ class _HomePageState extends State<HomePage> {
     for (var entry in data.entries) {
       debugPrint(entry.key);
     }
-    return RefreshIndicator(
-      triggerMode: RefreshIndicatorTriggerMode.onEdge,
-      onRefresh: () => fetchContent(showContent: false),
-      child: ListView(
-        scrollDirection: Axis.vertical,
-        shrinkWrap: true,
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        children: [
-          for (var entry in data.entries) ...[
-            Dismissible(
-              key: Key(entry.key),
-              background: Container(
-                color: Colors.red,
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.all(20),
-                child: const Icon(Icons.delete, color: Colors.white),
+    return Align(
+      alignment: Alignment.topCenter,
+      child: RefreshIndicator(
+        triggerMode: RefreshIndicatorTriggerMode.onEdge,
+        onRefresh: () => fetchContent(showContent: false),
+        child: ListView(
+          scrollDirection: Axis.vertical,
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(4),
+          children: [
+            for (var entry in data.entries) ...[
+              Dismissible(
+                key: Key(entry.key),
+                background: Container(
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(40),
+                    color: Colors.red,
+                  ),
+                  child: const Icon(Icons.delete, color: Colors.white),
+                ),
+                child: showArticle(entry.value),
               ),
-              child: showArticle(entry.value),
-            ),
-            //const SizedBox(height: 6,),
-          ]
-        ],
+              //const SizedBox(height: 6,),
+            ]
+          ],
+        )
       )
     );
   }
@@ -101,7 +107,7 @@ class _HomePageState extends State<HomePage> {
   Widget showArticle(dynamic article) {
     return Container(
       height: 100,
-      width: MediaQuery.of(context).size.width - 20,
+      width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.all(5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(20)),
@@ -125,7 +131,7 @@ class _HomePageState extends State<HomePage> {
               Text(article['age'].toString())
             ],
           ),
-          Spacer(),
+          /*Spacer(),
           IconButton(
             icon: Icon(Icons.start),
             onPressed: () async { // FAAA: Programm ist so lange freez bis antwort kommt
@@ -135,7 +141,7 @@ class _HomePageState extends State<HomePage> {
               debugPrint('Antwort auf Return: ${response.body}');
               setState(() {});
             }
-          ),
+          ), */
           //SizedBox(width: 10,),
         ],
       ),
@@ -184,7 +190,9 @@ class _HomePageState extends State<HomePage> {
           actions: [
             TextButton(
               onPressed: () {
-                ipAddr = _controller.text;
+                if (_controller.text != "") {
+                  ipAddr = _controller.text;
+                }
                 _controller.text = '';
                 Navigator.pop(context);
               },
@@ -196,7 +204,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<List<List<String>>> fetchContent({bool showContent = false}) async {
+  Future<List<List<String>>> fetchContent({bool showContent = true}) async {
     try {
       content = ['Search'];
       if (showContent) setState(() {});
@@ -311,7 +319,7 @@ class _HomePageState extends State<HomePage> {
             SizedBox(width: 10)
         ],
       ),
-      body: contentVerarbeiten(),
+      body: Center(child:contentVerarbeiten()),
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
