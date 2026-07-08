@@ -1,7 +1,8 @@
 import time
 import threading
-import lgpio
+#import lgpio
 import sys
+import math
 
 stop_event_x = threading.Event()
 stop_event_y = threading.Event()
@@ -17,6 +18,25 @@ POS = {
     "X": 0,
     "Y": 0,
 }
+
+def pos(addr):
+    row = math.floor(addr / 10) - 1
+    column = 5 - int(str(addr)[1:])
+    Xcoord = 1100 + column * 1500
+    Ycoord = 0
+    match row:
+        case 0 | 1 | 2:
+            Ycoord = row * 2300 - 600
+        case 3:
+            Ycoord = 6200
+        case 4:
+            Ycoord = 8450
+        case _:
+            Ycoord = 0
+            print("ALLLLARMMMMM Colum hat keinen Richtiigen Wert ALLLARMMM")
+    goto("X", Xcoord)
+    goto("Y", Ycoord)
+            
 
 def get_Pos(axis):
     return POS[axis]
@@ -133,7 +153,7 @@ def cleanup():
 def cli():
     """Einfache CLI für Motor-Kontrolle"""
     print("=== Motor Control CLI ===")
-    print("Befehle: get_pos, set_null, setup, rotate, stop, cleanup, exit, goto")
+    print("Befehle: get_pos, set_null, setup, rotate, stop, cleanup, exit, goto, pos")
     print()
     
     while True:
@@ -150,6 +170,9 @@ def cli():
                     print("Fehler: get_pos <axis> (z.B. get_pos X)")
                     continue
                 print(get_Pos(command[1]))
+            
+            elif cmd == "pos":
+                pos(int(command[1]))
             
             elif cmd == "set_null":
                 set_null()
