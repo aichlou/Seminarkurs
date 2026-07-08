@@ -1,6 +1,6 @@
 import time
 import threading
-#import lgpio
+import lgpio
 import sys
 import math
 
@@ -34,6 +34,8 @@ def pos(addr):
         case _:
             Ycoord = 0
             print("ALLLLARMMMMM Colum hat keinen Richtiigen Wert ALLLARMMM")
+    print(Xcoord)
+    print(Ycoord)
     goto("X", Xcoord)
     goto("Y", Ycoord)
             
