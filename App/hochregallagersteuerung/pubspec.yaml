@@ -60,6 +60,7 @@ flutter:
     - assets/animations/Empty box.json
     - assets/animations/Not Found.json
     - assets/animations/Loading.json
+    - assets/animations/box-changecolor.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -41,11 +41,10 @@ class _HomePageState extends State<HomePage> {
   String ipAddr = '127.0.0.1';
   final TextEditingController _controller = TextEditingController();
   List<String> content = ['Search'];
-  List<String> addContent = [''];
+  String addContent = 'Search';
   Map<String, dynamic> data = {'default': 'default'};
 
   Widget contentVerarbeiten() {
-    debugPrint('Content Verarbeiten Funktion: $content');
     if(content.isEmpty || content[0] == '') {
       return NoArticles();
     }
@@ -62,16 +61,51 @@ class _HomePageState extends State<HomePage> {
       return InitState();
     }
     else {
-      debugPrint(content.toString());
-      debugPrint('ARTIKEL WERDEN ANGEZEIGT');
       return showArticles();
     }
   }
 
-  Widget showArticles() {
-    for (var entry in data.entries) {
-      debugPrint(entry.key);
+  void addDialog() {
+    late StateSetter dialogSetState;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Neues Item hinzufügen'),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              dialogSetState = setState; 
+              isSet(dialogSetState);
+              return addContentVerarbeiten();
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context), // schließt den Dialog
+              child: Text('Oköööö'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget addContentVerarbeiten() {
+    switch(addContent) {
+      case 'Search':
+        return LoadArticles();
+      case 'Error':
+        return NotFound();
+      case 'Document':
+        return newItem();
+      case 'FillBox':
+        return FillBox();
+      default:
+        return Nothing();
     }
+  }
+
+  Widget showArticles() {
     return Align(
       alignment: Alignment.topCenter,
       child: RefreshIndicator(
@@ -87,14 +121,23 @@ class _HomePageState extends State<HomePage> {
                 key: Key(entry.key),
                 background: Container(
                   alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.all(20),
+                  margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(40),
                     color: Colors.red,
                   ),
-                  child: const Icon(Icons.delete, color: Colors.white),
+                  child: const Row(
+                    children: [
+                      SizedBox(width: 20,),
+                      Icon(Icons.delete, color: Colors.white)
+                    ]
+                  )
                 ),
-                child: showArticle(entry.value),
+                onDismissed: (_) => returnItem(entry.key),
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 16),
+                  child: showArticle(entry.value),
+                ),
               ),
               //const SizedBox(height: 6,),
             ]
@@ -131,38 +174,16 @@ class _HomePageState extends State<HomePage> {
               Text(article['age'].toString())
             ],
           ),
-          /*Spacer(),
-          IconButton(
-            icon: Icon(Icons.start),
-            onPressed: () async { // FAAA: Programm ist so lange freez bis antwort kommt
-              final response = await http.get(
-                Uri.parse('http://$ipAddr:5001/return?id=${article['id']}')
-              );
-              debugPrint('Antwort auf Return: ${response.body}');
-              setState(() {});
-            }
-          ), */
-          //SizedBox(width: 10,),
         ],
       ),
     );
   }
 
-  void newItem() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Neues Item hinzufügen'),
-          content: Text('coming soon...'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context), // schließt den Dialog
-              child: Text('Oköööö'),
-            ),
-          ],
-        );
-      },
+  Widget newItem() {
+    return Column(
+      children: [
+        Text('temp'),
+      ],
     );
   }
 
@@ -211,7 +232,6 @@ class _HomePageState extends State<HomePage> {
       final response = await http.get(
         Uri.parse('http://$ipAddr:5001/fetch')
       );
-      debugPrint('Antwort: ${response.body}');
       content = [response.body];
       if (content[0] == "init") {
         content = ['init'];
@@ -268,25 +288,35 @@ class _HomePageState extends State<HomePage> {
     return;
   }
 
-  Future<void> isSet() async {
-    final response = await http.get(
-      Uri.parse('http://$ipAddr:5001/isset')
-    );
-    debugPrint('Antwort isSet Request: ${response.body}');
-    switch(response.body) {
-      case 'YES':
-        
-        break;
-      case 'NO':
-
-        break;
+  Future<void> isSet(StateSetter? dialogSetState) async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://$ipAddr:5001/isset')
+      );
+      debugPrint('Antwort isSet Request: ${response.body}');
+      const Map<String,String> map = {
+        'YES': 'Document',
+        'NO': 'FillBox'
+      };
+      addContent = map[response.body] ?? 'Error';
     }
-    debugPrint(addContent.toString());
-    setState(() {});
-    if (addContent[0] == 'NO') {
+    catch (e) {
+      addContent = 'Error';
+      debugPrint(e.toString());
+    }
+    dialogSetState?.call(() {});
+    if (addContent == 'NO') {
       await Future.delayed(Duration(seconds: 2));
-      isSet();
+      isSet(dialogSetState);
     }
+    return;
+  }
+
+  Future<void> returnItem(String id) async {
+    final response = await http.get(
+      Uri.parse('http://$ipAddr:5001/return?id=$id')
+    );
+    debugPrint('Antwort return Request: ${response.body}');
     return;
   }
 
@@ -335,7 +365,7 @@ class _HomePageState extends State<HomePage> {
             child: const Icon(Icons.settings)),
           SizedBox(height: 10,),
           FloatingActionButton(
-            onPressed: newItem,
+            onPressed: addDialog,
             tooltip: 'Add new Item',
             child: const Icon(Icons.add),
           ),
@@ -433,6 +463,26 @@ class InitState extends StatelessWidget {
   }
 }
 
+class FillBox extends StatelessWidget {
+  const FillBox({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(height: 10,),
+        Text('Fülle die Box und stelle Sie auf die Station'),
+        Lottie.asset(
+          'assets/animations/box-changecolor.json',
+          width: 250,
+          height: 250,
+          repeat: true,
+        )
+      ]
+    );
+  }
+}
+
 class Nothing extends StatelessWidget {
   const Nothing({super.key});
 
@@ -441,4 +491,3 @@ class Nothing extends StatelessWidget {
     return Column();
   }
 }
-
