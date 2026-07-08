@@ -33,6 +33,12 @@ def fetch():
 def isset():
     return 'YES' 
 
+@app.route('/send')
+def send():
+    name = request.args.get('name')
+    beschreibung = request.args.get('beschreibung')
+    return 'YES'
+
 @app.route('/init')
 def init():
     global counter, isInit
