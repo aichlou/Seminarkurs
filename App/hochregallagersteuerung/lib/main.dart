@@ -43,6 +43,8 @@ class _HomePageState extends State<HomePage> {
   List<String> content = ['Search'];
   String addContent = 'Search';
   Map<String, dynamic> data = {'default': 'default'};
+  final _nameController = TextEditingController();
+  final _beschreibungController = TextEditingController();
 
   Widget contentVerarbeiten() {
     if(content.isEmpty || content[0] == '') {
@@ -67,6 +69,7 @@ class _HomePageState extends State<HomePage> {
 
   void addDialog() {
     late StateSetter dialogSetState;
+    bool isSetStarted = false;
     showDialog(
       context: context,
       builder: (context) {
@@ -75,14 +78,20 @@ class _HomePageState extends State<HomePage> {
           content: StatefulBuilder(
             builder: (context, setState) {
               dialogSetState = setState; 
-              isSet(dialogSetState);
+              if (!isSetStarted) {
+                isSetStarted = true;
+                isSet(dialogSetState);
+              }
               return addContentVerarbeiten();
             },
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context), // schließt den Dialog
-              child: Text('Oköööö'),
+              onPressed: () {
+                Navigator.pop(context);
+                
+              },
+              child: Text('Item lagern'),
             ),
           ],
         );
@@ -105,6 +114,9 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  double _dismissProgress = 0;
+  DismissDirection _dismissDirection = DismissDirection.endToStart;
+
   Widget showArticles() {
     return Align(
       alignment: Alignment.topCenter,
@@ -119,20 +131,28 @@ class _HomePageState extends State<HomePage> {
             for (var entry in data.entries) ...[
               Dismissible(
                 key: Key(entry.key),
-                background: Container(
-                  alignment: Alignment.centerLeft,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(40),
-                    color: Colors.red,
+                background: FractionallySizedBox(
+                  alignment: _dismissDirection == DismissDirection.startToEnd ? Alignment.centerLeft : Alignment.centerRight,
+                  widthFactor: _dismissProgress,
+                  child: Container(
+                    alignment: Alignment.centerLeft,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(400),
+                      color: Colors.red,
+                    ),
+                    child: const Row(
+                      children: [
+                        SizedBox(width: 20,),
+                        Icon(Icons.delete, color: Colors.white)
+                      ]
+                    ),
                   ),
-                  child: const Row(
-                    children: [
-                      SizedBox(width: 20,),
-                      Icon(Icons.delete, color: Colors.white)
-                    ]
-                  )
                 ),
+                onUpdate: (details) => setState(() {
+                  _dismissProgress = details.progress;
+                  _dismissDirection = details.direction;
+                }),
                 onDismissed: (_) => returnItem(entry.key),
                 child: Padding(
                   padding: EdgeInsets.only(bottom: 16),
@@ -179,13 +199,28 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget newItem() {
-    return Column(
-      children: [
-        Text('temp'),
-      ],
-    );
-  }
+Widget newItem() {
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      TextField(
+        controller: _nameController,
+        decoration: const InputDecoration(
+          labelText: 'Name',
+          border: OutlineInputBorder(),
+        ),
+      ),
+      const SizedBox(height: 12),
+      TextField(
+        controller: _beschreibungController,
+        decoration: const InputDecoration(
+          labelText: 'Beschreibung',
+          border: OutlineInputBorder(),
+        ),
+      ),
+    ],
+  );
+}
 
   void settings() {
     showDialog(
@@ -287,8 +322,11 @@ class _HomePageState extends State<HomePage> {
     }
     return;
   }
+  bool _isSetInProgress = false;
 
   Future<void> isSet(StateSetter? dialogSetState) async {
+    if (_isSetInProgress) return;
+    _isSetInProgress = true;
     try {
       final response = await http.get(
         Uri.parse('http://$ipAddr:5001/isset')
@@ -304,6 +342,9 @@ class _HomePageState extends State<HomePage> {
       addContent = 'Error';
       debugPrint(e.toString());
     }
+    finally {
+      _isSetInProgress = false;
+    }
     dialogSetState?.call(() {});
     if (addContent == 'NO') {
       await Future.delayed(Duration(seconds: 2));
@@ -312,7 +353,16 @@ class _HomePageState extends State<HomePage> {
     return;
   }
 
+  Future<void> sendItem(String name, String beschreibung) async {
+    final response = await http.get(
+      Uri.parse('http://$ipAddr:5001/send?name=$name&beschreibung=$beschreibung')
+    );
+    debugPrint('Antwort Send Request: ${response.body}');
+    return;
+  }
+
   Future<void> returnItem(String id) async {
+    data.remove(id);
     final response = await http.get(
       Uri.parse('http://$ipAddr:5001/return?id=$id')
     );
