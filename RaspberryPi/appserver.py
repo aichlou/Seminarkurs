@@ -29,6 +29,10 @@ def fetch():
             "13": {"name": "Bob", "age": 35},
         })
     
+@app.route('/isset')
+def isset():
+    return 'YES' 
+
 @app.route('/init')
 def init():
     global counter, isInit
