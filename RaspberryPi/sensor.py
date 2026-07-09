@@ -2,6 +2,7 @@ import lgpio
 import time
 
 SENSOR_PINS = [20, 21, 19, 26, 13, 6, 10] #9
+DISTANCE_SENSOR_INDEX = 6
 INVERT_PINS = [20, 21]
 TRIG_PIN = 5
 ECHO_PIN = 0
@@ -19,12 +20,19 @@ def read_sensors(commands):
     try:
         while True:
             dist = distance(h)
-            if dist < 5:
-                last_states[6] = True
-            else:
-                last_states[6] = False
-                
+            if dist is not None:
+                distance_state = dist < 5
+                if last_states[DISTANCE_SENSOR_INDEX] is None:
+                    last_states[DISTANCE_SENSOR_INDEX] = distance_state
+                elif distance_state != last_states[DISTANCE_SENSOR_INDEX]:
+                    print(f"Sensor an Pin {SENSOR_PINS[DISTANCE_SENSOR_INDEX]} (Index {DISTANCE_SENSOR_INDEX}) hat sich geändert zu {distance_state}")
+                    commands.put(("change_state", DISTANCE_SENSOR_INDEX, distance_state))
+                    last_states[DISTANCE_SENSOR_INDEX] = distance_state
+
             for index, pin in enumerate(SENSOR_PINS):
+                if index == DISTANCE_SENSOR_INDEX:
+                    continue
+
                 raw_state = lgpio.gpio_read(h, pin)
                 state = not raw_state if pin in INVERT_PINS else raw_state
                 if last_states[index] is None:
