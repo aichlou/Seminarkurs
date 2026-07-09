@@ -35,11 +35,16 @@ def host_server(commands):
     
     @app.route('/return')
     def ret():
-        id = request.args.get('id')
+        fach_id = request.args.get('id')
+        if not fach_id:
+            return 'Error: id parameter missing', 400
+        
         items = manager.alleItems()
-        fach_id = items.get(id)
+        if fach_id not in items:
+            return 'Error: Item not found', 404
+        
         manager.bearbeite_fach(fach_id, None, None, None)
-        return "id"
+        return 'OK'
         
     @app.route('/init')
     def init():

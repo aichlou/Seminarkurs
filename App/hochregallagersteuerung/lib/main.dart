@@ -400,7 +400,6 @@ Widget newItem() {
   }
 
   Future<void> returnItem(String id) async {
-    fetchContent();
     data.remove(id);
     final response = await http.get(
       Uri.parse('http://$ipAddr:5001/return?id=$id')
