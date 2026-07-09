@@ -6,8 +6,14 @@ pfad = os.path.join(script_dir, 'lager.json')
 
 def emptySpace():
     with open(pfad, 'r') as f:
-       lager = json.load(f)
-       
+        lager = json.load(f)
+        for etage in range(5):
+            for fach in range(5):
+                fach_id = str((etage + 1) * 10 + fach + 1)
+                if lager[str(etage)][fach_id]["name"] is None:
+                    return fach_id
+    return None
+
        
 def newLager():
     lager = {}
@@ -25,5 +31,4 @@ def newLager():
 
     with open('lager.json', 'w') as f:
         json.dump(lager, f, indent=2)
-        
-newLager()
+
