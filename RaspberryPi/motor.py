@@ -29,7 +29,7 @@ WEB_STATUS_URL = 'http://127.0.0.1:5000/status'
 
 def temp():
     zMotor(1)
-    zMotor(0.3)
+    zMotor(-0.3)
 
 def pos(addr, down):
     row = math.floor(int(addr) / 10) - 1
