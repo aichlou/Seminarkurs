@@ -1,8 +1,12 @@
 from flask import Flask, request, jsonify
 import json
+import urllib.request
 import manager
 import state
 from typing import Optional
+
+WEB_STATUS_URL = 'http://127.0.0.1:5000/status'
+
 
 def host_server(commands):
     app = Flask(__name__)
@@ -22,7 +26,15 @@ def host_server(commands):
         
     @app.route('/isset')
     def isset():
-        return 'YES' 
+        try:
+            with urllib.request.urlopen(WEB_STATUS_URL, timeout=2) as response:
+                status = json.loads(response.read().decode())
+        except Exception:
+            return 'NO'
+
+        if isinstance(status, list) and status:
+            return 'YES' if status[-1] else 'NO'
+        return 'NO'
 
     @app.route('/send')
     def send():
