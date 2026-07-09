@@ -38,7 +38,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String ipAddr = '127.0.0.1';
+  String ipAddr = '100.80.147.7';
   final TextEditingController _controller = TextEditingController();
   List<String> content = ['Search'];
   String addContent = 'Search';
@@ -328,9 +328,17 @@ Widget newItem() {
   }
 
   Future<void> initRequest() async {
-    final response = await http.get(
-      Uri.parse('http://$ipAddr:5001/init')
-    );
+    http.Response response;
+    try {
+      response = await http.get(
+        Uri.parse('http://$ipAddr:5001/init')
+      );
+    }
+    catch (e) {
+      content = ['Error'];
+      setState(() {});
+      return;
+    }
     debugPrint('Antwort init Request: ${response.body}');
     switch(response.body) {
       case 'OK':
