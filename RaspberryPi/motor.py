@@ -22,7 +22,7 @@ POS = {
 }
 
 def pos(addr, down):
-    row = math.floor(addr / 10) - 1
+    row = math.floor(int(addr) / 10) - 1
     column = 5 - int(str(addr)[1:])
     Xcoord = 1100 + column * 1500
     Ycoord = 0
