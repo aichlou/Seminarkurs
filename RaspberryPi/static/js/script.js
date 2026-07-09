@@ -1,9 +1,7 @@
 const speedXSlider = document.getElementById('speedX');
 const speedYSlider = document.getElementById('speedY');
-const speedZSlider = document.getElementById('speedZ');
 const speedXValue = document.getElementById('speedXValue');
 const speedYValue = document.getElementById('speedYValue');
-const speedZValue = document.getElementById('speedZValue');
 
 speedXSlider.addEventListener('input', function() {
     speedXValue.textContent = this.value + '%';
@@ -13,11 +11,8 @@ speedYSlider.addEventListener('input', function() {
     speedYValue.textContent = this.value + '%';
 });
 
-speedZSlider.addEventListener('input', function() {
-    speedZValue.textContent = this.value + '%';
-});
-
-let isClicked = { X: false, Y: false, Z: false };
+let isClicked = { X: false, Y: false
+};
 
 function Clicked(axis) {
     console.log("Button " + axis + " clicked");
@@ -31,7 +26,7 @@ function Clicked(axis) {
 }
 
 // Motor-Aktivierung
-let motorStates = { X: false, Y: false , Z: false};
+let motorStates = { X: false, Y: false};
 
 function activateMotor(axis) {
     motorStates[axis] = true;

@@ -38,7 +38,7 @@ def host_server(commands):
         speed = data.get("speed")
         active = data.get("active")
 
-        if axis not in ("X", "Y", "Z"):
+        if axis not in ("X", "Y"):
             return jsonify({"error": "Ungültige Achse"}), 400
         if not isinstance(active, bool):
             return jsonify({"error": "Ungültiger Aktivitätswert"}), 400

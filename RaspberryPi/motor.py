@@ -6,7 +6,6 @@ import math
 
 stop_event_x = threading.Event()
 stop_event_y = threading.Event()
-stop_event_z = threading.Event()
 h = None
 
 MOTOR_PINS = {
@@ -74,6 +73,21 @@ def get_handle():
     if h is None:
         h = lgpio.gpiochip_open(0)
     return h
+
+def station(spin, direction = False):
+    if spin:
+        if direction:
+            lgpio.gpio_write(h, 9, 1)
+            lgpio.gpio_write(h, 11, 0)
+        else:
+            lgpio.gpio_write(h, 9, 0)
+            lgpio.gpio_write(h, 11, 1)
+    else:
+        lgpio.gpio_write(h, 9, 0)
+        lgpio.gpio_write(h, 11, 0)
+
+#def zMotor(goto):
+    
 
 def set_null():
     POS["X"] = 0
