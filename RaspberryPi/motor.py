@@ -92,32 +92,37 @@ def station(spin, direction = False):
         lgpio.gpio_write(h, 11, 0)
 
 def zMotor(goto, sensor = False):
+    setup_motors()
     try:
-        if goto == -1:
+        if goto <= -1:
             lgpio.gpio_write(h, 2, 1)
             lgpio.gpio_write(h, 3, 0)
-        elif goto == 1:
+        elif goto >= 1:
             lgpio.gpio_write(h, 2, 0)
             lgpio.gpio_write(h, 3, 1)
         else:
-            if POS["Z"] > 0:
+            if POS["Z"] < 0:
                 zMotor(1 , True)
-            elif POS["Z"] < 0:
+            elif POS["Z"] > 0:
                 zMotor(-1, True)
             return
         while True:
+            #print("Ich mach was")
             if sensor:
                 s4, s5 = SensorZ()
+                print("4: " + str(s4) + ", 5: " + str(s5))
                 if s4 and s5:
                     break
             else:
-                if goto is -1:
-                    time.sleep(1)
+                if goto <= -1:
+                    POS["Z"] = POS["Z"] - goto
+                    time.sleep(-goto)
                 else:
-                    time.sleep(1.2)
+                    POS["Z"] = POS["Z"] + goto
+                    time.sleep(goto)
                 break
-    except Exception as e: 
-        print(f"Fehler: {e}")
+    except KeyError:
+        print(f"Fehler")
     lgpio.gpio_write(h, 2, 0)
     lgpio.gpio_write(h, 3, 0)
 
@@ -239,7 +244,7 @@ def cleanup():
 def cli():
     """Einfache CLI für Motor-Kontrolle"""
     print("=== Motor Control CLI ===")
-    print("Befehle: get_pos, set_null, setup, rotate, stop, cleanup, exit, goto, pos")
+    print("Befehle: get_pos, set_null, setup, rotate, stop, cleanup, exit, goto, pos, zmot")
     print()
     
     while True:
@@ -251,7 +256,10 @@ def cli():
             
             cmd = command[0]
             
-            if cmd == "get_pos":
+            if cmd == "zmot":
+                zMotor(float(command[1]))
+
+            elif cmd == "get_pos":
                 if len(command) < 2:
                     print("Fehler: get_pos <axis> (z.B. get_pos X)")
                     continue
