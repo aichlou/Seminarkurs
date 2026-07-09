@@ -7,15 +7,6 @@ import appserver
 from queue import Queue, Empty
 import init
 
-
-def temp(index, value):
-    webserver.set_state(index, value)
-    print(f"State {index} auf {value} gesetzt")
-    time.sleep(5)
-    webserver.set_state(index, not value)
-    print(f"State {index} auf {not value} gesetzt")
-
-
 def main():
     commands = Queue()
     sensordata = Queue()

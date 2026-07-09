@@ -3,6 +3,8 @@ import threading
 import lgpio
 import sys
 import math
+import urllib.request
+import json
 
 stop_event_x = threading.Event()
 stop_event_y = threading.Event()
@@ -16,6 +18,7 @@ MOTOR_PINS = {
 POS = {
     "X": 0,
     "Y": 0,
+    "Z": 0
 }
 
 def pos(addr, down):
@@ -88,7 +91,46 @@ def station(spin, direction = False):
         lgpio.gpio_write(h, 9, 0)
         lgpio.gpio_write(h, 11, 0)
 
-#def zMotor(goto):
+def zMotor(goto, sensor = False):
+    try:
+        if goto == -1:
+            lgpio.gpio_write(h, 2, 1)
+            lgpio.gpio_write(h, 3, 0)
+        elif goto == 1:
+            lgpio.gpio_write(h, 2, 0)
+            lgpio.gpio_write(h, 3, 1)
+        else:
+            if POS["Z"] > 0:
+                zMotor(1 , True)
+            elif POS["Z"] < 0:
+                zMotor(-1, True)
+            return
+        while True:
+            if sensor:
+                s4, s5 = SensorZ()
+                if s4 and s5:
+                    break
+            else:
+                if goto is -1:
+                    time.sleep(1)
+                else:
+                    time.sleep(1.2)
+                break
+    except Exception as e: 
+        print(f"Fehler: {e}")
+    lgpio.gpio_write(h, 2, 0)
+    lgpio.gpio_write(h, 3, 0)
+
+def SensorZ():
+    try:
+        with urllib.request.urlopen("http://127.0.0.1:5000/status") as response:
+            status = json.loads(response.read().decode())
+        sensor_4 = status[4]
+        sensor_5 = status[5]
+    except Exception:
+        sensor_4 = None
+        sensor_5 = None
+    return (sensor_4, sensor_5)
     
 
 def set_null():
