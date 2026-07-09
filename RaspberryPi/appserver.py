@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import json
 import manager
 import state
-
+from typing import Optional
 
 def host_server(commands):
     app = Flask(__name__)
