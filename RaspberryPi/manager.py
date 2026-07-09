@@ -14,6 +14,24 @@ def emptySpace():
                     return fach_id
     return None
 
+def alleItems():
+    with open(pfad, 'r') as f:
+        lager = json.load(f)
+
+    items = {}
+    for etage_name, etage in lager.items():
+        for fach_id, fach in etage.items():
+            if fach.get('name') is not None:
+                items[fach_id] = {
+                    'name': fach['name'],
+                    'beschreibung': fach.get('beschreibung'),
+                    'position': fach_id
+                }
+
+    if not items:
+        return {'0': 'Kein Inhalt'}
+    return items   
+
        
 def newLager():
     lager = {}
