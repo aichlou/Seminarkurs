@@ -19,7 +19,7 @@ POS = {
     "Y": 0,
 }
 
-def pos(addr):
+def pos(addr, down):
     row = math.floor(addr / 10) - 1
     column = 5 - int(str(addr)[1:])
     Xcoord = 1100 + column * 1500
@@ -34,11 +34,37 @@ def pos(addr):
         case _:
             Ycoord = 0
             print("ALLLLARMMMMM Colum hat keinen Richtiigen Wert ALLLARMMM")
+    if addr == -1:
+        Xcoord = 7170
+        Ycoord = -920
+    if down:
+        Ycoord = Ycoord -350
     print(Xcoord)
     print(Ycoord)
     goto("X", Xcoord)
     goto("Y", Ycoord)
-            
+      
+def send(addr):
+    #Z-Achse in Mitte
+    pos(-1, True)
+    #Z-Achse nach hinten
+    pos(-1, False)
+    #Z-Achse in die Mitte
+    pos(addr, False)
+    #Z-Achse nach vorne
+    pos(addr, True)
+    # Z-Achse in die Mitte
+    
+def ret(addr):  
+    #Z-Achse in Mitte
+    pos(addr, True)
+    # Z-Achse nach Vorne
+    pos(addr, False)
+    # Z-Achse in Mitte
+    pos(-1, False)
+    # Z-Achse nach Hinten
+    pos(-1, True)
+    # Z-Achse in die Mitte
 
 def get_Pos(axis):
     return POS[axis]

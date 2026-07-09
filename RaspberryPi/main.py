@@ -55,6 +55,14 @@ def main():
 
             command, *args = cmd
             match command:
+                case "send":
+                    print("Going to Position")
+                    send_thread = threading.Thread(target=motor.send, args=args, deamon=True)
+                    send_thread.start()
+                case "return":
+                    print("Going to Position")
+                    ret_thread = threading.Thread(target=motor.ret, args=args, deamon=True)
+                    ret_thread.start()
                 case "start_motor":
                     print("Starting motor thread")
                     rotate_thread = threading.Thread(target=motor.rotate, args=args, daemon=True)

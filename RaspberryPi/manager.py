@@ -14,6 +14,36 @@ def emptySpace():
                     return fach_id
     return None
 
+_UNSET = object()
+
+def bearbeite_fach(fach_id, name=_UNSET, beschreibung=_UNSET, bild_id=_UNSET):
+    global pfad
+    with open(pfad, 'r') as f:
+        lager = json.load(f)
+    fach_id = str(fach_id)
+
+    ziel_etage = None
+    for etage_name, faecher in lager.items():
+        if fach_id in faecher:
+            ziel_etage = etage_name
+            break
+
+    if ziel_etage is None:
+        raise KeyError(f"Fach_ID '{fach_id}' wurde in keiner Etage gefunden.")
+
+    fach = lager[ziel_etage][fach_id]
+
+    if name is not _UNSET:
+        fach['name'] = name
+    if beschreibung is not _UNSET:
+        fach['beschreibung'] = beschreibung
+    if bild_id is not _UNSET:
+        fach['bild_id'] = bild_id
+        
+    with open(pfad, 'w', encoding='utf-8') as f:
+        json.dump(lager, f, indent=2, ensure_ascii=False)
+
+
 def alleItems():
     with open(pfad, 'r') as f:
         lager = json.load(f)

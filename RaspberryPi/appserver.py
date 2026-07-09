@@ -28,8 +28,19 @@ def host_server(commands):
     def send():
         name = request.args.get('name')
         beschreibung = request.args.get('beschreibung')
+        fach_id = manager.emptySpace()
+        manager.bearbeite_fach(fach_id, name, beschreibung)
+        commands.put(("send", fach_id))
         return 'YES'
-
+    
+    @app.route('/return')
+    def ret():
+        id = request.args.get('id')
+        items = manager.alleItems()
+        fach_id = items.get(id)
+        manager.bearbeite_fach(fach_id, None, None, None)
+        return "id"
+        
     @app.route('/init')
     def init():
         if not state.was_init:
@@ -40,11 +51,6 @@ def host_server(commands):
             return 'NO'
         else:
             return 'IS'
-        
-    @app.route('/return')
-    def ret():
-        id = request.args.get('id')
-        return "id"
         
     @app.errorhandler(404)
     def not_found(error):
