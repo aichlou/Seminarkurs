@@ -31,7 +31,8 @@ def read_sensors(commands):
                     last_states[index] = state
                     
             dist = distance(h)
-            print(dist)
+            if dist is not None:
+                print(dist)
 
             time.sleep(0.01)   
     except KeyboardInterrupt:
@@ -40,21 +41,30 @@ def read_sensors(commands):
         lgpio.gpiochip_close(h)
 
 def distance(h):
-    lgpio.gpio_write(h, TRIG_PIN, 1)
-    time.sleep(0.00001)
-    lgpio.gpio_write(h, TRIG_PIN, 0)
-    
-    timeout = time.time() + 0.1
-    while lgpio.gpio_read(h, ECHO_PIN) == 0 and time.time() < timeout:
-        start = time.time()
-    
-    timeout = time.time() + 0.1
-    while lgpio.gpio_read(h, ECHO_PIN) == 1 and time.time() < timeout:
-        end = time.time()
-    
-    elapsed = end - start
-    distance_cm = (elapsed * 34300) / 2
-    
-    return distance_cm
+    try:
+        lgpio.gpio_write(h, TRIG_PIN, 1)
+        time.sleep(0.00001)
+        lgpio.gpio_write(h, TRIG_PIN, 0)
+        
+        start = None
+        end = None
+        
+        timeout = time.time() + 0.1
+        while lgpio.gpio_read(h, ECHO_PIN) == 0 and time.time() < timeout:
+            start = time.time()
+        
+        timeout = time.time() + 0.1
+        while lgpio.gpio_read(h, ECHO_PIN) == 1 and time.time() < timeout:
+            end = time.time()
+        
+        if start is None or end is None:
+            return None
+        
+        elapsed = end - start
+        distance_cm = (elapsed * 34300) / 2
+        
+        return distance_cm
+    except Exception as e:
+        return None
 
 
