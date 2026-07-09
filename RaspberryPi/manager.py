@@ -1,14 +1,15 @@
 import os
+import json
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 pfad = os.path.join(script_dir, 'lager.json')
 
-def EmptySpace:
+def emptySpace():
     with open(pfad, 'r') as f:
        lager = json.load(f)
        
        
-def newLager:
+def newLager():
     lager = {}
 
     for etage in range(5):
