@@ -89,7 +89,7 @@ class _HomePageState extends State<HomePage> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                
+                sendItem(_nameController.text, _beschreibungController.text);
               },
               child: Text('Item lagern'),
             ),
