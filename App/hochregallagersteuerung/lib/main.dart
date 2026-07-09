@@ -118,6 +118,13 @@ class _HomePageState extends State<HomePage> {
   DismissDirection _dismissDirection = DismissDirection.endToStart;
 
   Widget showArticles() {
+    // If the backend returned the special "Kein Inhalt" map, show empty state
+    if (data.isEmpty) return NoArticles();
+    if (data.length == 1) {
+      final firstVal = data.values.first;
+      if (firstVal is String && firstVal == 'Kein Inhalt') return NoArticles();
+    }
+
     return Align(
       alignment: Alignment.topCenter,
       child: RefreshIndicator(
@@ -129,7 +136,7 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.all(4),
           children: [
             for (var entry in data.entries) ...[
-              Dismissible(
+              if (entry.value is Map) Dismissible(
                 key: Key(entry.key),
                 background: FractionallySizedBox(
                   alignment: _dismissDirection == DismissDirection.startToEnd ? Alignment.centerLeft : Alignment.centerRight,
@@ -159,7 +166,6 @@ class _HomePageState extends State<HomePage> {
                   child: showArticle(entry.value),
                 ),
               ),
-              //const SizedBox(height: 6,),
             ]
           ],
         )
@@ -168,31 +174,55 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget showArticle(dynamic article) {
+    final name = article['name'] ?? 'Unbenannt';
+    final beschreibung = article['beschreibung'] ?? '';
+
     return Container(
-      height: 100,
       width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.all(5),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(20)),
-        color: Colors.blue,
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        color: Colors.blue.shade700,
         border: Border.all(
           color: Colors.lightBlue,
-          width: 3
-        )
+          width: 2,
+        ),
       ),
       child: Row(
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                article['name'],
-                style: TextStyle(
-                  fontSize: 20,
-                ),  
-              ),
-              Text(article['age'].toString())
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  beschreibung,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.lightBlue,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(Icons.inventory_2, color: Colors.white),
           ),
         ],
       ),
