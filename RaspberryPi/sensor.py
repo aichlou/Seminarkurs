@@ -3,8 +3,8 @@ import time
 
 SENSOR_PINS = [20, 21, 19, 26, 13, 6, 10] #9
 INVERT_PINS = [20, 21]
-TRIG_PIN = 17
-ECHO_PIN = 27
+TRIG_PIN = 5
+ECHO_PIN = 0
 
 
 def read_sensors(commands):
