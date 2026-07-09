@@ -427,6 +427,9 @@ Widget newItem() {
   }
 
   Future<void> sendItem(String name, String beschreibung) async {
+    if(addContent != "Document") {
+      return;
+    }
     final response = await http.get(
       Uri.parse('http://$ipAddr:5001/send?name=$name&beschreibung=$beschreibung')
     );

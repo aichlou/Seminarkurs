@@ -8,18 +8,24 @@ import json
 
 stop_event_x = threading.Event()
 stop_event_y = threading.Event()
+stop_event_z = threading.Event()
 h = None
 
 MOTOR_PINS = {
     "X": {"PUL": 14, "DIR": 15, "ENA": 18},
     "Y": {"PUL": 17, "DIR": 27, "ENA": 22},
+    "Z": {"PUL": 2, "DIR": 3, "ENA": None},
 }
+
+STATION_PINS = {"A": 9, "B": 11}
 
 POS = {
     "X": 0,
     "Y": 0,
     "Z": 0
 }
+
+WEB_STATUS_URL = 'http://127.0.0.1:5000/status'
 
 def temp():
     zMotor(1)
@@ -84,26 +90,33 @@ def get_handle():
     return h
 
 def station(spin, direction = False):
+    handle = get_handle()
+    a_pin = STATION_PINS.get("A")
+    b_pin = STATION_PINS.get("B")
     if spin:
         if direction:
-            lgpio.gpio_write(h, 9, 1)
-            lgpio.gpio_write(h, 11, 0)
+            if a_pin is not None: lgpio.gpio_write(handle, a_pin, 1)
+            if b_pin is not None: lgpio.gpio_write(handle, b_pin, 0)
         else:
-            lgpio.gpio_write(h, 9, 0)
-            lgpio.gpio_write(h, 11, 1)
+            if a_pin is not None: lgpio.gpio_write(handle, a_pin, 0)
+            if b_pin is not None: lgpio.gpio_write(handle, b_pin, 1)
     else:
-        lgpio.gpio_write(h, 9, 0)
-        lgpio.gpio_write(h, 11, 0)
+        if a_pin is not None: lgpio.gpio_write(handle, a_pin, 0)
+        if b_pin is not None: lgpio.gpio_write(handle, b_pin, 0)
 
 def zMotor(goto, sensor = False):
     setup_motors()
+    handle = get_handle()
+    z_pins = MOTOR_PINS.get("Z", {})
+    pul = z_pins.get("PUL")
+    dir_pin = z_pins.get("DIR")
     try:
         if goto <= -1:
-            lgpio.gpio_write(h, 2, 1)
-            lgpio.gpio_write(h, 3, 0)
+            if dir_pin is not None: lgpio.gpio_write(handle, dir_pin, 1)
+            if pul is not None: lgpio.gpio_write(handle, pul, 0)
         elif goto >= 1:
-            lgpio.gpio_write(h, 2, 0)
-            lgpio.gpio_write(h, 3, 1)
+            if dir_pin is not None: lgpio.gpio_write(handle, dir_pin, 0)
+            if pul is not None: lgpio.gpio_write(handle, pul, 1)
         else:
             if POS["Z"] < 0:
                 zMotor(1 , True)
@@ -111,31 +124,32 @@ def zMotor(goto, sensor = False):
                 zMotor(-1, True)
             return
         while True:
-            #print("Ich mach was")
             if sensor:
                 try:
                     with urllib.request.urlopen(WEB_STATUS_URL, timeout=2) as response:
                         status = json.loads(response.read().decode())
-                except Exception:
+                except Exception as e:
+                    print("zMotor: Fehler beim Abrufen des Status:", e)
                     break
 
-                if isinstance(status, list) and status:
+                if isinstance(status, list) and len(status) > 5:
                     print("4: " + str(status[4]) + ", 5: " + str(status[5]))
                     if status[4] and status[5]:
                         break
 
             else:
-                if goto <= -1:
-                    POS["Z"] = POS["Z"] - goto
-                    time.sleep(-goto)
+                mag = abs(goto)
+                if goto < 0:
+                    POS["Z"] -= mag
+                    time.sleep(mag)
                 else:
-                    POS["Z"] = POS["Z"] + goto
-                    time.sleep(goto)
+                    POS["Z"] += mag
+                    time.sleep(mag)
                 break
-    except KeyError:
-        print(f"Fehler")
-    lgpio.gpio_write(h, 2, 0)
-    lgpio.gpio_write(h, 3, 0)
+    except Exception as e:
+        print(f"Fehler in zMotor: {e}")
+    if dir_pin is not None: lgpio.gpio_write(handle, dir_pin, 0)
+    if pul is not None: lgpio.gpio_write(handle, pul, 0)
 
 def SensorZ():
     try:
@@ -163,10 +177,28 @@ def setup_motors():
     h = lgpio.gpiochip_open(0)
 
     for axis, pins in MOTOR_PINS.items():
-        lgpio.gpio_claim_output(h, pins["PUL"], 0)
-        lgpio.gpio_claim_output(h, pins["DIR"], 0)
-        lgpio.gpio_claim_output(h, pins["ENA"], 0)
-        lgpio.gpio_write(h, pins["ENA"], 1)
+        pul = pins.get("PUL")
+        dir_pin = pins.get("DIR")
+        ena = pins.get("ENA")
+        if pul is not None:
+            lgpio.gpio_claim_output(h, pul, 0)
+        if dir_pin is not None:
+            lgpio.gpio_claim_output(h, dir_pin, 0)
+        if ena is not None:
+            lgpio.gpio_claim_output(h, ena, 0)
+            lgpio.gpio_write(h, ena, 1)
+
+    # Claim station pins if present
+    for pin in STATION_PINS.values():
+        try:
+            lgpio.gpio_claim_output(h, pin, 0)
+            lgpio.gpio_write(h, pin, 0)
+        except Exception:
+            pass
+    lgpio.gpio_claim_output(h, 2, 0)
+    lgpio.gpio_claim_output(h, 3, 0)
+    lgpio.gpio_claim_output(h, 9, 0)
+    lgpio.gpio_claim_output(h, 11, 0)
 
 def goto(axis, target):
     pos = get_Pos(axis)
@@ -193,22 +225,32 @@ def rotate(axis, speed, border = None):
 
     pins = MOTOR_PINS[axis]
     if speed == 0:
-        lgpio.gpio_write(handle, pins["ENA"], 1)
+        ena = pins.get("ENA")
+        if ena is not None:
+            lgpio.gpio_write(handle, ena, 1)
         print(f"Motor {axis} wurde nicht gestartet: Geschwindigkeit ist 0")
         return
 
     direction = 1 if speed < 0 else 0
-    lgpio.gpio_write(handle, pins["DIR"], direction)
-    lgpio.gpio_write(handle, pins["ENA"], 0)
+    dir_pin = pins.get("DIR")
+    pul_pin = pins.get("PUL")
+    ena = pins.get("ENA")
+    if dir_pin is not None:
+        lgpio.gpio_write(handle, dir_pin, direction)
+    if ena is not None:
+        lgpio.gpio_write(handle, ena, 0)
     speed = abs(speed)
     pause = 1 / (40 * (speed + 10))
 
     print(f"Starte Motor {axis} mit Geschwindigkeit {speed}, Richtung {direction}")
     try:
         while not stop_event.is_set():
-            lgpio.gpio_write(handle, pins["PUL"], 1)
+            if pul_pin is None:
+                print(f"Kein PUL-Pin für Motor {axis}, breche Drehung ab")
+                break
+            lgpio.gpio_write(handle, pul_pin, 1)
             time.sleep(pause)
-            lgpio.gpio_write(handle, pins["PUL"], 0)
+            lgpio.gpio_write(handle, pul_pin, 0)
             time.sleep(pause)
             POS[axis] = POS[axis] - ((direction * 2) - 1)
             if border is not None and border == POS[axis]:
@@ -216,8 +258,10 @@ def rotate(axis, speed, border = None):
     except Exception as exc:
         print("Fehler beim Drehen des Motors:", exc)
     finally:
-        lgpio.gpio_write(handle, pins["ENA"], 1)
-        lgpio.gpio_write(handle, pins["DIR"], 0)
+        if ena is not None:
+            lgpio.gpio_write(handle, ena, 1)
+        if dir_pin is not None:
+            lgpio.gpio_write(handle, dir_pin, 0)
         print("Motor gestoppt")
 
 
@@ -239,8 +283,19 @@ def cleanup():
 
     for pins in MOTOR_PINS.values():
         try:
-            lgpio.gpio_write(h, pins["ENA"], 1)
-            lgpio.gpio_write(h, pins["DIR"], 0)
+            ena = pins.get("ENA")
+            dir_pin = pins.get("DIR")
+            if ena is not None:
+                lgpio.gpio_write(h, ena, 1)
+            if dir_pin is not None:
+                lgpio.gpio_write(h, dir_pin, 0)
+        except Exception:
+            pass
+
+    # Reset station pins
+    for pin in STATION_PINS.values():
+        try:
+            lgpio.gpio_write(h, pin, 0)
         except Exception:
             pass
 
