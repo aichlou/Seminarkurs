@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify, render_template
 import logging
+import state
 
 # Globale Zustände (z.B. Sensoren oder Motoren)
 states = [False, False, False, False, False, False, False]
-was_init = False
 
 
 def set_state(index, value):
@@ -60,11 +60,10 @@ def host_server(commands):
     @app.route("/init", methods=["GET"])
     def initialize():
         print("INIT WURDE GEDRÜCKT")
-        global was_init
-        if not was_init:
+        if not state.was_init:
             print("STARTE INIT VON WEBSERVER AUS")
             commands.put(("init",))
-            was_init = True
+            state.was_init = True
             return jsonify({"ok": True}), 200
         print("System ist bereits initialisiert")
         return jsonify({"error": "Bereits initialisiert"}), 409

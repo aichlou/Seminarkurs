@@ -3,6 +3,7 @@ import threading
 import webserver
 import motor
 import sensor
+import appserver
 from queue import Queue, Empty
 import init
 
@@ -26,6 +27,14 @@ def main():
     )
     host_thread.start()
     print("Hosting Webserver")
+    
+    app_thread = threading.Thread(
+        target=appserver.host_server,
+        args=(commands,),
+        daemon=True
+    )
+    app_thread.start()
+    print("Hosting Appserver")
 
     motor.setup_motors()
     print("Motors are set up")

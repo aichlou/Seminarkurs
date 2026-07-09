@@ -1,6 +1,7 @@
 import time
 from queue import Empty
 import motor
+import state
 
 SENSOR_SIDES = {
     "X": [0, 1],
@@ -69,6 +70,9 @@ def init(sensordata, commands):
     print(f"Bewege X-Achse um eine Einheit: {unit:.3f} Sekunden")
     commands.put(("0"))
     time.sleep(0.01)
+    
+    # Signalisiere, dass Init fertig ist
+    state.init_complete = True
     #commands.put(("start_motor", "X", 0.25))
     #time.sleep(unit)
     #commands.put(("stop_motor", "X"))
