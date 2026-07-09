@@ -52,43 +52,6 @@ def init(sensordata, commands):
     motor.setup_motors()
     _clear_queue(sensordata)
     timedata = [0.0, 0.0, 0.0, 0.0]
-    print("Starte x-Achsen Motor")
-    sensorcounter = 0
-    speed = 0.6
-    while not sensordata.empty():
-        sensordata.get()
-    while sensorcounter < 2:
-        commands.put(("start_motor", "X", speed))
-        cmd = sensordata.get()
-        pin, state = cmd
-        print(f"Pin {pin} ist jetzt {state}")
-        if sensorcounter == 0 and pin == 0 and state:
-            timedata[sensorcounter] = time.time()
-            commands.put(("stop_motor", "X"))
-            speed = -speed
-            sensorcounter += 1
-        if sensorcounter == 1 and pin == 1 and state:
-            timedata[sensorcounter] = time.time()
-            commands.put(("stop_motor", "X"))
-            speed = -speed
-            sensorcounter += 1
-    print("X-Achse der initialisierung abgeschlossen")
-    speed = 0.7
-    while sensorcounter < 4:
-        commands.put(("start_motor", "Y", speed))
-        cmd = sensordata.get()
-        pin, state = cmd
-        print(f"Pin {pin} ist jetzt {state}")
-        if sensorcounter == 2 and pin == 2 and state:
-            timedata[sensorcounter] = time.time()
-            commands.put(("stop_motor", "Y"))
-            speed = -speed
-            sensorcounter += 1
-        if sensorcounter == 3 and pin == 3 and state:
-            timedata[sensorcounter] = time.time()
-            commands.put(("stop_motor", "Y"))
-            speed = -speed
-            sensorcounter += 1
     try:
         duration_x = _home_axis("X", commands, sensordata, speed=0.4)
         print("X-Achse der Initialisierung abgeschlossen")
