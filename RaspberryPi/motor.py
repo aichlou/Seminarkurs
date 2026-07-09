@@ -21,6 +21,10 @@ POS = {
     "Z": 0
 }
 
+def temp():
+    zMotor(1)
+    zMotor(0.3)
+
 def pos(addr, down):
     row = math.floor(int(addr) / 10) - 1
     column = 5 - int(str(addr)[1:])
@@ -264,7 +268,8 @@ def cli():
                     print("Fehler: get_pos <axis> (z.B. get_pos X)")
                     continue
                 print(get_Pos(command[1]))
-            
+            elif cmd == "station":
+                station(int(command[1]))
             elif cmd == "pos":
                 pos(int(command[1]))
             
