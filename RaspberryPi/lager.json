@@ -1,13 +1,13 @@
 {
   "0": {
     "11": {
-      "name": null,
-      "beschreibung": null,
+      "name": "Lennards",
+      "beschreibung": "Ich bins",
       "bild_id": null
     },
     "12": {
-      "name": null,
-      "beschreibung": null,
+      "name": "Lennards3",
+      "beschreibung": "Ich bins doch",
       "bild_id": null
     },
     "13": {
@@ -28,8 +28,8 @@
   },
   "1": {
     "21": {
-      "name": "Banane",
-      "beschreibung": "Nix",
+      "name": null,
+      "beschreibung": null,
       "bild_id": null
     },
     "22": {
