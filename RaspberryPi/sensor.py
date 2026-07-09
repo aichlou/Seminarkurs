@@ -12,6 +12,7 @@ def read_sensors(commands):
     h = lgpio.gpiochip_open(0)
     lgpio.gpio_claim_output(h, TRIG_PIN)
     lgpio.gpio_claim_input(h, ECHO_PIN)
+    SENSOR_PINS = [20, 21, 19, 26, 13, 9]
     for pin in SENSOR_PINS:
         lgpio.gpio_claim_input(h, pin, lgpio.SET_PULL_UP)
 
