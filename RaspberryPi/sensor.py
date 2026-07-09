@@ -1,7 +1,7 @@
 import lgpio
 import time
 
-SENSOR_PINS = [20, 21, 19, 26, 13, 6, 10]
+SENSOR_PINS = [20, 21, 19, 26, 13, 6, 10] #9
 INVERT_PINS = [20, 21]
 TRIG_PIN = 17
 ECHO_PIN = 27
@@ -12,7 +12,6 @@ def read_sensors(commands):
     h = lgpio.gpiochip_open(0)
     lgpio.gpio_claim_output(h, TRIG_PIN)
     lgpio.gpio_claim_input(h, ECHO_PIN)
-    SENSOR_PINS = [20, 21, 19, 26, 13, 9]
     for pin in SENSOR_PINS:
         lgpio.gpio_claim_input(h, pin, lgpio.SET_PULL_UP)
 
@@ -31,7 +30,7 @@ def read_sensors(commands):
                     commands.put(("change_state", index, state))
                     last_states[index] = state
                     
-            dist = distance()
+            dist = distance(h)
             print(dist)
 
             time.sleep(0.01)   
@@ -40,7 +39,7 @@ def read_sensors(commands):
     finally:
         lgpio.gpiochip_close(h)
 
-def distance():
+def distance(h):
     lgpio.gpio_write(h, TRIG_PIN, 1)
     time.sleep(0.00001)
     lgpio.gpio_write(h, TRIG_PIN, 0)
