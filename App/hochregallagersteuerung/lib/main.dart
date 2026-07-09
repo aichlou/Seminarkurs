@@ -367,27 +367,33 @@ Widget newItem() {
     if (_isSetInProgress) return;
     _isSetInProgress = true;
     try {
-      final response = await http.get(
-        Uri.parse('http://$ipAddr:5001/isset')
-      );
-      debugPrint('Antwort isSet Request: ${response.body}');
-      const Map<String,String> map = {
-        'YES': 'Document',
-        'NO': 'FillBox'
-      };
-      addContent = map[response.body] ?? 'Error';
+      while (true) {
+        final response = await http.get(
+          Uri.parse('http://$ipAddr:5001/isset')
+        );
+        final body = response.body.trim();
+        debugPrint('Antwort isSet Request: $body');
+        const Map<String,String> map = {
+          'YES': 'Document',
+          'NO': 'FillBox'
+        };
+        addContent = map[body] ?? 'Error';
+        dialogSetState?.call(() {});
+
+        if (body == 'YES' || body == 'Error') {
+          break;
+        }
+
+        await Future.delayed(const Duration(seconds: 2));
+      }
     }
     catch (e) {
       addContent = 'Error';
       debugPrint(e.toString());
+      dialogSetState?.call(() {});
     }
     finally {
       _isSetInProgress = false;
-    }
-    dialogSetState?.call(() {});
-    if (addContent == 'NO') {
-      await Future.delayed(Duration(seconds: 2));
-      isSet(dialogSetState);
     }
     return;
   }
