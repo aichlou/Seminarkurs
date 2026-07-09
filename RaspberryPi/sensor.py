@@ -18,6 +18,12 @@ def read_sensors(commands):
     last_states = [None] * len(SENSOR_PINS)
     try:
         while True:
+            dist = distance(h)
+            if dist < 5:
+                last_states[6] = True
+            else:
+                last_states[6] = False
+                
             for index, pin in enumerate(SENSOR_PINS):
                 raw_state = lgpio.gpio_read(h, pin)
                 state = not raw_state if pin in INVERT_PINS else raw_state
@@ -29,14 +35,6 @@ def read_sensors(commands):
                     print(f"Sensor an Pin {pin} (Index {index}) hat sich geändert zu {state}")
                     commands.put(("change_state", index, state))
                     last_states[index] = state
-                    
-            dist = distance(h)
-            if dist < 5:
-                last_states[6] = True
-            else:
-                last_states[6] = False
-            #if dist is not None:
-                #print(dist)
 
             time.sleep(0.01)   
     except KeyboardInterrupt:
