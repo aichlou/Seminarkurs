@@ -44,6 +44,7 @@ def pos(addr, down):
     goto("Y", Ycoord)
       
 def send(addr):
+    print("Motor Thread ist Ready für Senden des Elements")
     #Z-Achse in Mitte
     pos(-1, True)
     #Z-Achse nach hinten
@@ -55,6 +56,7 @@ def send(addr):
     # Z-Achse in die Mitte
     
 def ret(addr):  
+    print("Motor Thread ist Ready für Returen des Elements")
     #Z-Achse in Mitte
     pos(addr, True)
     # Z-Achse nach Vorne

@@ -31,6 +31,7 @@ def host_server(commands):
         fach_id = manager.emptySpace()
         manager.bearbeite_fach(fach_id, name, beschreibung)
         commands.put(("send", fach_id))
+        print("Fahre um Elemnt in Fach {fach_id} zu lagern")
         return 'YES'
     
     @app.route('/return')
@@ -44,6 +45,8 @@ def host_server(commands):
             return 'Error: Item not found', 404
         
         manager.bearbeite_fach(fach_id, None, None, None)
+        commands.put(("return", fach_id))
+        print("Fahre um Elemnt von Fach {fach_id} aus dem Lager zu holen")
         return 'OK'
         
     @app.route('/init')
