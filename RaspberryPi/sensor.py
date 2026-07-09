@@ -31,8 +31,12 @@ def read_sensors(commands):
                     last_states[index] = state
                     
             dist = distance(h)
-            if dist is not None:
-                print(dist)
+            if dist < 5:
+                last_states[6] = True
+            else:
+                last_states[6] = False
+            #if dist is not None:
+                #print(dist)
 
             time.sleep(0.01)   
     except KeyboardInterrupt:
