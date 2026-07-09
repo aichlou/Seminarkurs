@@ -113,10 +113,17 @@ def zMotor(goto, sensor = False):
         while True:
             #print("Ich mach was")
             if sensor:
-                s4, s5 = SensorZ()
-                print("4: " + str(s4) + ", 5: " + str(s5))
-                if s4 and s5:
+                try:
+                    with urllib.request.urlopen(WEB_STATUS_URL, timeout=2) as response:
+                        status = json.loads(response.read().decode())
+                except Exception:
                     break
+
+                if isinstance(status, list) and status:
+                    print("4: " + str(status[4]) + ", 5: " + str(status[5]))
+                    if status[4] and status[5]:
+                        break
+
             else:
                 if goto <= -1:
                     POS["Z"] = POS["Z"] - goto

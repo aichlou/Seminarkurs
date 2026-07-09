@@ -45,6 +45,7 @@ class _HomePageState extends State<HomePage> {
   Map<String, dynamic> data = {'default': 'default'};
   final _nameController = TextEditingController();
   final _beschreibungController = TextEditingController();
+  bool _isAddDialogOpen = false;
 
   Widget contentVerarbeiten() {
     if(content.isEmpty || content[0] == '') {
@@ -70,17 +71,20 @@ class _HomePageState extends State<HomePage> {
   void addDialog() {
     late StateSetter dialogSetState;
     bool isSetStarted = false;
+    setState(() { _isAddDialogOpen = true; });
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text('Neues Item hinzufügen'),
-          content: StatefulBuilder(
+              content: StatefulBuilder(
             builder: (context, setState) {
               dialogSetState = setState; 
               if (!isSetStarted) {
                 isSetStarted = true;
-                isSet(dialogSetState);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (_isAddDialogOpen) isSet(dialogSetState);
+                });
               }
               return addContentVerarbeiten();
             },
@@ -97,7 +101,10 @@ class _HomePageState extends State<HomePage> {
           ],
         );
       },
-    );
+    ).then((_) {
+      // Dialog closed
+      if (mounted) setState(() { _isAddDialogOpen = false; });
+    });
   }
 
   Widget addContentVerarbeiten() {
@@ -372,25 +379,46 @@ Widget newItem() {
           Uri.parse('http://$ipAddr:5001/isset')
         );
         final body = response.body.trim();
-        debugPrint('Antwort isSet Request: $body');
         const Map<String,String> map = {
           'YES': 'Document',
           'NO': 'FillBox'
         };
+        if (response.statusCode != 200) {
+          addContent = 'Error';
+          try {
+            dialogSetState?.call(() {});
+          } catch (_) {
+            // dialog likely closed/disposed; stop polling
+            break;
+          }
+          break;
+        }
+
         addContent = map[body] ?? 'Error';
-        dialogSetState?.call(() {});
+        // stop polling if dialog was closed
+        if (!_isAddDialogOpen) break;
+        try {
+          dialogSetState?.call(() {});
+        } catch (_) {
+          break;
+        }
 
         if (body == 'YES' || body == 'Error') {
           break;
         }
 
+        if (!_isAddDialogOpen) break;
         await Future.delayed(const Duration(seconds: 2));
       }
     }
     catch (e) {
       addContent = 'Error';
       debugPrint(e.toString());
-      dialogSetState?.call(() {});
+      try {
+        dialogSetState?.call(() {});
+      } catch (_) {
+        // ignore: setState after dispose or dialog already closed
+      }
     }
     finally {
       _isSetInProgress = false;
