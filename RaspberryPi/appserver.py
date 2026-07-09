@@ -50,5 +50,4 @@ def host_server(commands):
     def not_found(error):
         return "Error: Route nicht gefunden"
 
-    if __name__ == '__main__':
-        app.run(host='0.0.0.0', port=5001)
+    app.run(host='0.0.0.0', port=5001, debug=False, use_reloader=False)
