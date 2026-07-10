@@ -101,6 +101,7 @@ def ret(addr):
     zMotor(0)
     pos(-1, False)
     zMotor(1)
+    station(True)
     pos(-1, True)
     station_auslagern()
     zMotor(0)
