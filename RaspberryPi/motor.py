@@ -28,7 +28,10 @@ POS = {
 WEB_STATUS_URL = 'http://127.0.0.1:5000/status'
 
 def temp():
+    print("motor.temp: starting homing sequence")
+    print("motor.temp: calling zMotor(1)")
     zMotor(1)
+    print("motor.temp: calling zMotor(-0.3)")
     zMotor(-0.3)
 
 def pos(addr, down):
@@ -105,6 +108,7 @@ def station(spin, direction = False):
         if b_pin is not None: lgpio.gpio_write(handle, b_pin, 0)
 
 def zMotor(goto, sensor = False):
+    print(f"zMotor: called with goto={goto!r}, sensor={sensor}, current Z={POS['Z']}")
     setup_motors()
     handle = get_handle()
     z_pins = MOTOR_PINS.get("Z", {})
@@ -153,6 +157,7 @@ def zMotor(goto, sensor = False):
             if dir_pin is not None: lgpio.gpio_write(handle, dir_pin, 0)
 
         mag = abs(goto)
+        print(f"zMotor: non-zero move, dir_pin={dir_pin}, pul={pul}, mag={mag}")
         if pul is not None:
             # perform pulses proportional to mag (simple approximation)
             # here mag is treated as seconds; keep previous semantics
