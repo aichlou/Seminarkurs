@@ -66,8 +66,9 @@ def init(sensordata, commands):
         print("Initialisierung Y-Achse fehlgeschlagen:", exc)
         return
 
-    unit = duration_x / 5
-    print(f"Bewege X-Achse um eine Einheit: {unit:.3f} Sekunden")
+    motor.zMotor(0)
+    #unit = duration_x / 5
+    #print(f"Bewege X-Achse um eine Einheit: {unit:.3f} Sekunden")
     commands.put(("0"))
     time.sleep(0.01)
     

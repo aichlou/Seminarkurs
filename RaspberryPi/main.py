@@ -36,8 +36,8 @@ def main():
         daemon=True,
     )
     sensor_thread.start()
-    motor_thread = threading.Thread(target=motor.temp, args=(), daemon=True)
-    motor_thread.start()
+    #motor_thread = threading.Thread(target=motor.temp, args=(), daemon=True)
+    #motor_thread.start()
     print("Motor temp thread started")
     try:
         while True:

@@ -55,18 +55,18 @@
   },
   "2": {
     "31": {
-      "name": null,
-      "beschreibung": null,
+      "name": "Test",
+      "beschreibung": "Ich bin nicht echt",
       "bild_id": null
     },
     "32": {
-      "name": null,
-      "beschreibung": null,
+      "name": "Uwe",
+      "beschreibung": "VAddr",
       "bild_id": null
     },
     "33": {
-      "name": null,
-      "beschreibung": null,
+      "name": "Uwe",
+      "beschreibung": "VAddr",
       "bild_id": null
     },
     "34": {

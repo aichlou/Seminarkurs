@@ -32,7 +32,11 @@ WEB_STATUS_URL = 'http://127.0.0.1:5000/status'
 def temp():
     print("motor.temp: starting homing sequence")
     print("motor.temp: calling zMotor(1)")
-    zMotor(1)
+    zMotor(-1)
+    print("motor.temp: calling zMotor(0)")
+    zMotor(0)
+    print("motor.temp: calling zMotor(-1)")
+    zMotor(-1)
     print("motor.temp: calling zMotor(0)")
     zMotor(0)
 
@@ -63,27 +67,30 @@ def pos(addr, down):
       
 def send(addr):
     print("Motor Thread ist Ready für Senden des Elements")
-    #Z-Achse in Mitte
+    zMotor(0)
     pos(-1, True)
-    #Z-Achse nach hinten
+    zMotor(1)
+    station(True)
+    time.sleep(3)
+    station(True, True)
     pos(-1, False)
-    #Z-Achse in die Mitte
+    zMotor(0)
     pos(addr, False)
-    #Z-Achse nach vorne
+    zMotor(-1)
     pos(addr, True)
-    # Z-Achse in die Mitte
+    zMotor(0)
     
-def ret(addr):  
+def ret(addr):
     print("Motor Thread ist Ready für Returen des Elements")
-    #Z-Achse in Mitte
+    zMotor(0)
     pos(addr, True)
-    # Z-Achse nach Vorne
+    zMotor(-1)
     pos(addr, False)
-    # Z-Achse in Mitte
+    zMotor(0)
     pos(-1, False)
-    # Z-Achse nach Hinten
+    zMotor(1)
     pos(-1, True)
-    # Z-Achse in die Mitte
+    zMotor(0)
 
 def get_Pos(axis):
     return POS[axis]
@@ -136,8 +143,8 @@ def zMotor(goto, sensor = False):
                 print("zMotor: POS[Z] < 0, fahre Richtung 1 bis Mitte erreicht")
                 return zMotor(1, sensor=True)
             else:
-                print("zMotor: POS[Z] == 0, Sensoren signalisieren nicht Mitte; fahre Richtung 1 mit Sensorüberwachung")
-                return zMotor(1, sensor=True)
+                print("zMotor: POS[Z] == 0, Sensoren signalisieren nicht Mitte; fahre Richtung - 1 mit Sensorüberwachung")
+                return zMotor(-1, sensor=True)
 
         # goto == -1 oder goto == 1
         if goto == -1:
@@ -165,7 +172,7 @@ def zMotor(goto, sensor = False):
                     break
                 time.sleep(0.05)
         else:
-            duration = 0.4
+            duration = 15
             print(f"zMotor: Zeitorientierte Bewegung, Dauer={duration}s")
             time.sleep(duration)
             if goto == -1:
