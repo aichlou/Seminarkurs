@@ -370,7 +370,7 @@ Widget newItem() {
   }
   bool _isSetInProgress = false;
 
-  Future<void> isSet(StateSetter? dialogSetState) async { //TODO: Lichtschranke AHHH
+  Future<void> isSet(StateSetter? dialogSetState) async {
     if (_isSetInProgress) return;
     _isSetInProgress = true;
     try {
@@ -439,10 +439,15 @@ Widget newItem() {
 
   Future<void> returnItem(String id) async {
     data.remove(id);
+    try {
     final response = await http.get(
       Uri.parse('http://$ipAddr:5001/return?id=$id')
     );
     debugPrint('Antwort return Request: ${response.body}');
+    }
+    catch (e) {
+      content = ['error'];
+    }
     return;
   }
 

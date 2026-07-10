@@ -28,6 +28,20 @@ POS = {
 }
 
 WEB_STATUS_URL = 'http://127.0.0.1:5000/status'
+LOCAL_ISSET_URL = 'http://127.0.0.1:5001/isset'
+
+
+def local_isset_check(timeout=2):
+    """Prüft /isset auf localhost:5001 und gibt True/False zurück."""
+    try:
+        with urllib.request.urlopen(LOCAL_ISSET_URL, timeout=timeout) as response:
+            body = response.read().decode().strip()
+        print(f"motor.local_isset_check: got '{body}' from {LOCAL_ISSET_URL}")
+        return body == 'YES'
+    except Exception as exc:
+        print(f"motor.local_isset_check: {exc}")
+        return False
+
 
 def temp():
     print("motor.temp: starting homing sequence")
@@ -115,7 +129,23 @@ def station(spin, direction = False):
     else:
         if a_pin is not None: lgpio.gpio_write(handle, a_pin, 0)
         if b_pin is not None: lgpio.gpio_write(handle, b_pin, 0)
-
+        
+        
+def station_einlagern():
+    print("Beginne Station einlagern")
+    station(True)
+    while local_isset_check():
+        time.sleep(0.3)
+    time.sleep(2)
+    station(False)
+    
+def station_auslagern():
+    print("Beginne Station auslagern")
+    station(True, True)
+    while not local_isset_check():
+        time.sleep(0.3)
+    station(False)
+    
 def zMotor(goto, sensor = False):
     print(f"zMotor: called with goto={goto!r}, sensor={sensor}, current Z={POS['Z']}")
     if goto not in (-1, 0, 1):
@@ -172,7 +202,7 @@ def zMotor(goto, sensor = False):
                     break
                 time.sleep(0.05)
         else:
-            duration = 15
+            duration = 15.5
             print(f"zMotor: Zeitorientierte Bewegung, Dauer={duration}s")
             time.sleep(duration)
             if goto == -1:
