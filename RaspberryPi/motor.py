@@ -121,11 +121,11 @@ def zMotor(goto, sensor = False):
         if goto == 0:
             s4, s5 = SensorZ()
             print(f"zMotor: goto=0 requested, sensor initial values: 4={s4}, 5={s5}")
-            if not s4 and not s5:
-                print("zMotor: beide Sensoren false, nehme an Z ist in der Mitte und stoppe.")
-                return
-            if s4 and s5:
-                print("zMotor: Beide Sensoren aktiv, Z bereits in der Mitte.")
+            if not s4 and s5:
+                print("zMotor: falscher Sensor ist an, weitermachen.")
+                #return
+            if s4 and not  s5:
+                print("zMotor: Sensor 4 aktiv, 5 nicht, Z bereits in der Mitte.")
                 return
 
             if POS["Z"] > 0:
