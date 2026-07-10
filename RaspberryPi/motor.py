@@ -126,6 +126,7 @@ def zMotor(goto, sensor = False):
                 #return
             if s4 and not  s5:
                 print("zMotor: Sensor 4 aktiv, 5 nicht, Z bereits in der Mitte.")
+                POS["Z"] = 0
                 return
 
             if POS["Z"] > 0:
@@ -149,13 +150,13 @@ def zMotor(goto, sensor = False):
             lgpio.gpio_write(handle, Z_POS_PIN, 1)
 
         if sensor:
-            print("zMotor: Sensor-Modus aktiv, stoppe sobald beide Sensoren drücken")
+            print("zMotor: Sensor-Modus aktiv, stoppe sobald Sensor 4 aktiv ist")
             steps = 0
             while True:
                 s4, s5 = SensorZ()
                 print(f"zMotor: sensor loop step={steps} sensor4={s4} sensor5={s5}")
-                if s4 and s5:
-                    print("zMotor: beide Sensoren aktiv, stoppe Z-Motor")
+                if s4 and not s5:
+                    print("zMotor: Sensor 4 aktiv und Sensor 5 deaktiv (Mitte erreicht), stoppe Z-Motor")
                     POS["Z"] = 0
                     break
                 steps += 1

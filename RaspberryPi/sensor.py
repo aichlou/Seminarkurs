@@ -17,14 +17,38 @@ def read_sensors(commands):
         lgpio.gpio_claim_input(h, pin, lgpio.SET_PULL_UP)
 
     last_states = [None] * len(SENSOR_PINS)
+    
+    # Warte kurz und initialisiere alle aktuellen Sensor-States
+    print("Sensor-Thread: Warte 0.2s vor initialer Sensor-Erfassung...")
+    time.sleep(0.2)
+    
+    for index, pin in enumerate(SENSOR_PINS):
+        if index == DISTANCE_SENSOR_INDEX:
+            # Distanzsensor
+            dist = distance(h)
+            if dist is not None:
+                distance_state = dist < 5
+                last_states[DISTANCE_SENSOR_INDEX] = distance_state
+                if distance_state:
+                    print(f"Sensor-Thread: Initial - Sensor an Pin {SENSOR_PINS[DISTANCE_SENSOR_INDEX]} (Index {DISTANCE_SENSOR_INDEX}) ist ON")
+                    commands.put(("change_state", DISTANCE_SENSOR_INDEX, True))
+            else:
+                last_states[DISTANCE_SENSOR_INDEX] = False
+        else:
+            # Digitale Sensoren
+            raw_state = lgpio.gpio_read(h, pin)
+            state = not raw_state if pin in INVERT_PINS else raw_state
+            last_states[index] = state
+            if state:
+                print(f"Sensor-Thread: Initial - Sensor an Pin {pin} (Index {index}) ist ON")
+                commands.put(("change_state", index, True))
+    
     try:
         while True:
             dist = distance(h)
             if dist is not None:
                 distance_state = dist < 5
-                if last_states[DISTANCE_SENSOR_INDEX] is None:
-                    last_states[DISTANCE_SENSOR_INDEX] = distance_state
-                elif distance_state != last_states[DISTANCE_SENSOR_INDEX]:
+                if distance_state != last_states[DISTANCE_SENSOR_INDEX]:
                     print(f"Sensor an Pin {SENSOR_PINS[DISTANCE_SENSOR_INDEX]} (Index {DISTANCE_SENSOR_INDEX}) hat sich geändert zu {distance_state}")
                     commands.put(("change_state", DISTANCE_SENSOR_INDEX, distance_state))
                     last_states[DISTANCE_SENSOR_INDEX] = distance_state
@@ -35,10 +59,6 @@ def read_sensors(commands):
 
                 raw_state = lgpio.gpio_read(h, pin)
                 state = not raw_state if pin in INVERT_PINS else raw_state
-                if last_states[index] is None:
-                    last_states[index] = state
-                    continue
-
                 if state != last_states[index]:
                     print(f"Sensor an Pin {pin} (Index {index}) hat sich geändert zu {state}")
                     commands.put(("change_state", index, state))
