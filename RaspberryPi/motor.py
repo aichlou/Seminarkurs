@@ -135,7 +135,9 @@ def zMotor(goto, sensor = False):
                 POS["Z"] = POS["Z"] - ((dir_bit * 2) - 1)
 
                 s4, s5 = SensorZ()
+                print(f"zMotor: step={steps} POS[Z]={POS['Z']} sensor4={s4} sensor5={s5}")
                 if s4 and s5:
+                    print("zMotor: Mitte erreicht, beide Sensoren aktiv.")
                     break
                 steps += 1
 
@@ -169,14 +171,29 @@ def zMotor(goto, sensor = False):
 
 def SensorZ():
     try:
-        with urllib.request.urlopen("http://127.0.0.1:5000/status") as response:
-            status = json.loads(response.read().decode())
+        with urllib.request.urlopen(WEB_STATUS_URL, timeout=2) as response:
+            raw = response.read().decode()
+        try:
+            status = json.loads(raw)
+        except json.JSONDecodeError as err:
+            print(f"SensorZ: JSON-Decode-Fehler: {err}; raw={raw!r}")
+            return (None, None)
+
+        if not isinstance(status, list):
+            print(f"SensorZ: Status ist kein Liste, sondern {type(status).__name__}: {status!r}")
+            return (None, None)
+
+        if len(status) <= 5:
+            print(f"SensorZ: Status-Liste zu kurz ({len(status)}): {status!r}")
+            return (None, None)
+
         sensor_4 = status[4]
         sensor_5 = status[5]
-    except Exception:
-        sensor_4 = None
-        sensor_5 = None
-    return (sensor_4, sensor_5)
+        print(f"SensorZ: status[4]={sensor_4!r}, status[5]={sensor_5!r}")
+        return (bool(sensor_4), bool(sensor_5))
+    except Exception as exc:
+        print(f"SensorZ: Fehler beim Abruf des Status: {exc}")
+        return (None, None)
     
 
 def set_null():
