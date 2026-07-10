@@ -84,9 +84,7 @@ def send(addr):
     zMotor(0)
     pos(-1, True)
     zMotor(1)
-    station(True)
-    time.sleep(3)
-    station(True, True)
+    station_einlagern()
     pos(-1, False)
     zMotor(0)
     pos(addr, False)
@@ -104,6 +102,7 @@ def ret(addr):
     pos(-1, False)
     zMotor(1)
     pos(-1, True)
+    station_auslagern()
     zMotor(0)
 
 def get_Pos(axis):
