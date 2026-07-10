@@ -137,15 +137,15 @@ def station_testen():
         
 def station_einlagern():
     print("Beginne Station einlagern")
-    station(True)
+    station(True, True)
     while local_isset_check():
         time.sleep(0.3)
-    time.sleep(2)
+    time.sleep(6)
     station(False)
     
 def station_auslagern():
     print("Beginne Station auslagern")
-    station(True, True)
+    station(True)
     while not local_isset_check():
         time.sleep(0.3)
     station(False)
