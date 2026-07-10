@@ -14,8 +14,10 @@ h = None
 MOTOR_PINS = {
     "X": {"PUL": 14, "DIR": 15, "ENA": 18},
     "Y": {"PUL": 17, "DIR": 27, "ENA": 22},
-    "Z": {"PUL": 2, "DIR": 3, "ENA": None},
 }
+
+Z_NEG_PIN = 2
+Z_POS_PIN = 3
 
 STATION_PINS = {"A": 9, "B": 11}
 
@@ -31,8 +33,8 @@ def temp():
     print("motor.temp: starting homing sequence")
     print("motor.temp: calling zMotor(1)")
     zMotor(1)
-    print("motor.temp: calling zMotor(-0.3)")
-    zMotor(-0.3)
+    print("motor.temp: calling zMotor(0)")
+    zMotor(0)
 
 def pos(addr, down):
     row = math.floor(int(addr) / 10) - 1
@@ -109,70 +111,74 @@ def station(spin, direction = False):
 
 def zMotor(goto, sensor = False):
     print(f"zMotor: called with goto={goto!r}, sensor={sensor}, current Z={POS['Z']}")
+    if goto not in (-1, 0, 1):
+        print(f"zMotor: Ungültiger goto-Wert {goto!r}; erwartete -1, 0 oder 1")
+        return
+
     setup_motors()
     handle = get_handle()
-    z_pins = MOTOR_PINS.get("Z", {})
-    pul = z_pins.get("PUL")
-    dir_pin = z_pins.get("DIR")
     try:
-        # Special case: goto == 0 -> move to middle until both sensors 4 & 5 are True
         if goto == 0:
-            # decide direction bit consistent with `rotate()` (1 -> decrement POS)
-            dir_bit = 0 if POS["Z"] < 0 else 1
-            if dir_pin is not None:
-                lgpio.gpio_write(handle, dir_pin, dir_bit)
-
-            if pul is None:
-                print("zMotor: Kein PUL-Pin für Z-Achse definiert")
+            s4, s5 = SensorZ()
+            print(f"zMotor: goto=0 requested, sensor initial values: 4={s4}, 5={s5}")
+            if not s4 and not s5:
+                print("zMotor: beide Sensoren false, nehme an Z ist in der Mitte und stoppe.")
+                return
+            if s4 and s5:
+                print("zMotor: Beide Sensoren aktiv, Z bereits in der Mitte.")
                 return
 
-            max_steps = 2000
+            if POS["Z"] > 0:
+                print("zMotor: POS[Z] > 0, fahre Richtung -1 bis Mitte erreicht")
+                return zMotor(-1, sensor=True)
+            elif POS["Z"] < 0:
+                print("zMotor: POS[Z] < 0, fahre Richtung 1 bis Mitte erreicht")
+                return zMotor(1, sensor=True)
+            else:
+                print("zMotor: POS[Z] == 0, Sensoren signalisieren nicht Mitte; fahre Richtung 1 mit Sensorüberwachung")
+                return zMotor(1, sensor=True)
+
+        # goto == -1 oder goto == 1
+        if goto == -1:
+            print("zMotor: starte Bewegung in Richtung -1 (Pin 2 HIGH, Pin 3 LOW)")
+            lgpio.gpio_write(handle, Z_NEG_PIN, 1)
+            lgpio.gpio_write(handle, Z_POS_PIN, 0)
+        else:
+            print("zMotor: starte Bewegung in Richtung 1 (Pin 2 LOW, Pin 3 HIGH)")
+            lgpio.gpio_write(handle, Z_NEG_PIN, 0)
+            lgpio.gpio_write(handle, Z_POS_PIN, 1)
+
+        if sensor:
+            print("zMotor: Sensor-Modus aktiv, stoppe sobald beide Sensoren drücken")
             steps = 0
-            while steps < max_steps:
-                # Pulse once
-                lgpio.gpio_write(handle, pul, 1)
-                time.sleep(0.01)
-                lgpio.gpio_write(handle, pul, 0)
-                time.sleep(0.01)
-
-                # update POS similar to rotate()
-                POS["Z"] = POS["Z"] - ((dir_bit * 2) - 1)
-
+            while True:
                 s4, s5 = SensorZ()
-                print(f"zMotor: step={steps} POS[Z]={POS['Z']} sensor4={s4} sensor5={s5}")
+                print(f"zMotor: sensor loop step={steps} sensor4={s4} sensor5={s5}")
                 if s4 and s5:
-                    print("zMotor: Mitte erreicht, beide Sensoren aktiv.")
+                    print("zMotor: beide Sensoren aktiv, stoppe Z-Motor")
+                    POS["Z"] = 0
                     break
                 steps += 1
-
-            if steps >= max_steps:
-                print("zMotor: Max steps reached while homing Z; sensors not both True")
-            return
-
-        # Non-zero goto: simple timed move (keeps previous behaviour)
-        if goto < 0:
-            # negative -> move in negative direction pin pattern
-            if dir_pin is not None: lgpio.gpio_write(handle, dir_pin, 1)
+                if steps > 500:
+                    print("zMotor: Sensor-Modus Timeout nach 500 Versuchen")
+                    break
+                time.sleep(0.05)
         else:
-            if dir_pin is not None: lgpio.gpio_write(handle, dir_pin, 0)
-
-        mag = abs(goto)
-        print(f"zMotor: non-zero move, dir_pin={dir_pin}, pul={pul}, mag={mag}")
-        if pul is not None:
-            # perform pulses proportional to mag (simple approximation)
-            # here mag is treated as seconds; keep previous semantics
-            if goto < 0:
-                POS["Z"] -= mag
-                time.sleep(mag)
+            duration = 0.4
+            print(f"zMotor: Zeitorientierte Bewegung, Dauer={duration}s")
+            time.sleep(duration)
+            if goto == -1:
+                POS["Z"] -= 1
             else:
-                POS["Z"] += mag
-                time.sleep(mag)
+                POS["Z"] += 1
+            print(f"zMotor: Bewegung abgeschlossen, neuer POS[Z]={POS['Z']}")
 
     except Exception as e:
         print(f"Fehler in zMotor: {e}")
     finally:
-        if dir_pin is not None: lgpio.gpio_write(handle, dir_pin, 0)
-        if pul is not None: lgpio.gpio_write(handle, pul, 0)
+        lgpio.gpio_write(handle, Z_NEG_PIN, 0)
+        lgpio.gpio_write(handle, Z_POS_PIN, 0)
+        print("zMotor: Z-Motor angehalten")
 
 def SensorZ():
     try:
