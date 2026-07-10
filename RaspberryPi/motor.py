@@ -130,6 +130,10 @@ def station(spin, direction = False):
         if a_pin is not None: lgpio.gpio_write(handle, a_pin, 0)
         if b_pin is not None: lgpio.gpio_write(handle, b_pin, 0)
         
+def station_testen():
+    station_einlagern()
+    time.sleep(2)
+    station_auslagern()        
         
 def station_einlagern():
     print("Beginne Station einlagern")
